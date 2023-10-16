@@ -1,19 +1,16 @@
-package com.renan.cifraeditor.domain.services.daos
+package com.renan.cifraeditor.domain.daos
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.renan.cifraeditor.data.tables.Tom
-
+@Dao
 interface TomDao {
     @Query("SELECT * FROM tom")
     suspend fun getAll(): List<Tom>
-
-    @Query("SELECT * FROM tom WHERE id IN (:ids)")
-    suspend fun loadAllByIds(ids: IntArray): List<Tom>
-
     @Insert
-    suspend fun insertAll(toms: Tom)
+    suspend fun insert(tom: Tom)
 
     @Delete
     suspend fun delete(tom: Tom)

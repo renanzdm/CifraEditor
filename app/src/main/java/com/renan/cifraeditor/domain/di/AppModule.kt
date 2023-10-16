@@ -1,8 +1,7 @@
-package com.renan.cifraeditor.domain.di.appmodule
+package com.renan.cifraeditor.domain.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.renan.cifraeditor.domain.database.CifraEditorDatabase
 import dagger.Module
 import dagger.Provides
@@ -18,10 +17,9 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideDatabase(@ApplicationContext appContext: Context): RoomDatabase {
+    fun provideDatabase(@ApplicationContext appContext: Context): CifraEditorDatabase {
         return Room.databaseBuilder(
-            appContext,
-            CifraEditorDatabase::class.java, "cifra-editor-database"
+            appContext, CifraEditorDatabase::class.java, "cifra-editor-database"
         ).build()
     }
 
