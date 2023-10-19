@@ -9,12 +9,14 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.renan.cifraeditor.presenter.addciphers.AddCipherPage
 import com.renan.cifraeditor.presenter.home.HomePage
+import com.renan.cifraeditor.presenter.soundcontrol.SoundControlPage
 
 sealed class AppRoutes {
     companion object {
-        const val splashRoute: String = "home"
         const val homeRoute: String = "home"
         const val addCipherRoute: String = "add-cipher"
+        const val soundControlRoute: String = "soundControl"
+
     }
 }
 
@@ -22,7 +24,7 @@ sealed class AppRoutes {
 fun AppNavigationHost(
     navController: NavHostController = rememberNavController(),
 ) {
-    NavHost(navController = navController, startDestination = AppRoutes.splashRoute) {
+    NavHost(navController = navController, startDestination = AppRoutes.homeRoute) {
         homeGraph(navController = navController)
     }
 }
@@ -31,5 +33,6 @@ fun AppNavigationHost(
 fun NavGraphBuilder.homeGraph(navController: NavHostController) {
     composable(AppRoutes.homeRoute) { HomePage(navController = navController) }
     composable(AppRoutes.addCipherRoute) { AddCipherPage(navController = navController) }
+    composable(AppRoutes.soundControlRoute) { SoundControlPage(navController = navController) }
 
 }
