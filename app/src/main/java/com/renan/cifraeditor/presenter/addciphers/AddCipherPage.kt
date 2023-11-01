@@ -56,22 +56,25 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AddCipherPage(navController: NavController,addCipherViewModel: AddCipherViewModel = hiltViewModel()) {
+fun AddCipherPage(
+    navController: NavController,
+    addCipherViewModel: AddCipherViewModel = hiltViewModel(),
+) {
     val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 0)
     val uiState = addCipherViewModel.state.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
-    LifecycleStartEffect(lifecycleOwner = LocalLifecycleOwner.current){
+    LifecycleStartEffect(lifecycleOwner = LocalLifecycleOwner.current) {
         addCipherViewModel.getAllToms()
-        onStopOrDispose {  }
+        onStopOrDispose { }
     }
 
     Scaffold(topBar = {
-        AppTopBar(title = "Nova Cifra", backOnTap = { navController.popBackStack() })
+        AppTopBar(title = "Nova Cifra")
     }) { padding ->
         Column(
             modifier = Modifier
-                .padding(padding)
                 .padding(horizontal = 16.dp)
+                .padding(bottom = 104.dp)
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .imePadding()
@@ -83,7 +86,7 @@ fun AddCipherPage(navController: NavController,addCipherViewModel: AddCipherView
             ) { page ->
                 when (page) {
                     0 -> AddLetterCipherPage()
-                    1-> AddTom(toms = uiState.value.allToms)
+                    1 -> AddTom(toms = uiState.value.allToms)
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -110,7 +113,13 @@ fun AddCipherPage(navController: NavController,addCipherViewModel: AddCipherView
                     Text(text = "Voltar")
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                ElevatedButton(onClick = { coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }}) {
+                ElevatedButton(onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(
+                            pagerState.currentPage + 1
+                        )
+                    }
+                }) {
                     Text(text = "Avançar")
                 }
             }
@@ -154,7 +163,7 @@ fun AddLetterCipherPage() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTom(toms:List<TomEntity>) {
+fun AddTom(toms: List<TomEntity>) {
     var expanded by remember { mutableStateOf(false) }
     var selectedValue: TomEntity? by remember { mutableStateOf(null) }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {

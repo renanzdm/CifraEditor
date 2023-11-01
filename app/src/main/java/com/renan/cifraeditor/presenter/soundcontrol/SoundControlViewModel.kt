@@ -1,21 +1,24 @@
 package com.renan.cifraeditor.presenter.soundcontrol
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
+import android.net.ConnectivityManager.NetworkCallback
 import android.net.wifi.WifiManager
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import android.text.format.Formatter
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.net.InetAddress
 import javax.inject.Inject
+
 
 @HiltViewModel
 class SoundControlViewModel @Inject constructor() : ViewModel() {
@@ -59,6 +62,12 @@ class SoundControlViewModel @Inject constructor() : ViewModel() {
 
     fun closeDialogResults() {
         _state.update { it.copy(openDialog = false) }
+    }
+
+    fun getIpAddressConnectedWifi(context:Context){
+        viewModelScope.launch (Dispatchers.IO){
+        }
+
     }
 
 
