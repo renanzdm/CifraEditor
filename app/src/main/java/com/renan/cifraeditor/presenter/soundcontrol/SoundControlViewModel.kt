@@ -2,11 +2,11 @@ package com.renan.cifraeditor.presenter.soundcontrol
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.DhcpInfo
 import android.net.LinkProperties
-import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.illposed.osc.OSCMessage
+import com.illposed.osc.transport.udp.OSCPortOut
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,16 +32,23 @@ class SoundControlViewModel @Inject constructor() : ViewModel() {
         _state.update { it.copy(openDialog = false) }
     }
 
-    fun getWifiConnectedProperties(context: Context) {
+    fun getWifiConnectedProperties(context: Context): String? {
         val currentNetwork = getConnectivityManager(context).activeNetwork
         val properties: LinkProperties? =
             getConnectivityManager(context).getLinkProperties(currentNetwork)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            viewModelScope.launch {
-            println(DhcpInfo().gateway)
+        return properties?.dhcpServerAddress?.toString()?.replace("/", "", false)
+    }
+
+
+    fun connectOSCServer(ip: String, port: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val oscPortOut: OSCPortOut = OSCPortOut(InetAddress.getByName(ip), port.toInt())
+                oscPortOut.connect()
+                oscPortOut.send(OSCMessage("/cs/chan/select/1"))
+                oscPortOut.send(OSCMessage("/cs/chan/at/40"))
             }
         }
-
     }
 
 

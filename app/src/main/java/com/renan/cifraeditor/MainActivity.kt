@@ -85,15 +85,15 @@ fun BottomButtons(navController: NavController) {
 sealed class ScreensBottomBars(
     val route: String, val title: String? = null, val icon: Int? = null
 ) {
-    object HomeScreen : ScreensBottomBars(
+    data object HomeScreen : ScreensBottomBars(
         route = "home", title = "Home", icon = R.drawable.baseline_home_24
     )
 
-    object AddCifras : ScreensBottomBars(
+    data object AddCifras : ScreensBottomBars(
         route = "add-cipher", title = "Cifras", icon = R.drawable.baseline_music_note_24
     )
 
-    object SoundControl : ScreensBottomBars(
+    data object SoundControl : ScreensBottomBars(
         route = "sound-control", title = "Controle de Som", icon = R.drawable.baseline_equalizer_24
     )
 
