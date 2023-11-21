@@ -3,17 +3,25 @@ package com.renan.cifraeditor.domain.database
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.renan.cifraeditor.data.tables.Chord
+import com.renan.cifraeditor.data.tables.Cipher
 import com.renan.cifraeditor.data.tables.Tom
+import com.renan.cifraeditor.data.tables.Word
+import com.renan.cifraeditor.domain.daos.CipherDao
 import com.renan.cifraeditor.domain.daos.TomDao
+import com.renan.cifraeditor.domain.daos.WordDao
 import com.renan.cifraeditor.domain.entities.TomEntity
 
 @Database(
-    entities = [Tom::class],
+    entities = [Tom::class,Cipher::class,Word::class,Chord::class],
     version = 1,
     exportSchema = true,
 )
 abstract class CifraEditorDatabase : RoomDatabase() {
     abstract fun tomDao(): TomDao
+    abstract fun cipherDao():CipherDao
+
+    abstract fun wordsDao():WordDao
 }
 
 

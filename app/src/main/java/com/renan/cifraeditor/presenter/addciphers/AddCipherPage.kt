@@ -8,46 +8,48 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
+import com.example.compose.md_theme_dark_onError
 import com.renan.cifraeditor.R
 import com.renan.cifraeditor.domain.entities.TomEntity
 import com.renan.cifraeditor.presenter.ui.components.AppTopBar
@@ -57,36 +59,40 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AddCipherPage(
-    navController: NavController,
     addCipherViewModel: AddCipherViewModel = hiltViewModel(),
 ) {
     val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 0)
     val uiState = addCipherViewModel.state.collectAsStateWithLifecycle()
+    val localConfiguration = LocalConfiguration.current
+    var isError by rememberSaveable { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     LifecycleStartEffect(lifecycleOwner = LocalLifecycleOwner.current) {
         addCipherViewModel.getAllToms()
         onStopOrDispose { }
     }
-
     Scaffold(topBar = {
         AppTopBar(title = "Nova Cifra")
     }) { padding ->
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 104.dp)
-                .statusBarsPadding()
+                .height(height = localConfiguration.screenHeightDp.dp)
                 .navigationBarsPadding()
-                .imePadding()
+                .padding(horizontal = 16.dp)
         ) {
             HorizontalPager(
                 state = pagerState,
                 userScrollEnabled = false,
                 verticalAlignment = Alignment.Top,
+                contentPadding = padding
             ) { page ->
                 when (page) {
-                    0 -> AddLetterCipherPage()
-                    1 -> AddTom(toms = uiState.value.allToms)
+                    0 -> AddNameCipherPage(
+                        validateNameMusic = { isError = addCipherViewModel.validateNameMusic(it) },
+                        isError = isError
+                    )
+
+                    1 -> AddTomPage(toms = uiState.value.allToms, onSelect = {})
+                    2 -> AddLetterPage()
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -109,18 +115,24 @@ fun AddCipherPage(
                 }
             }
             Row {
-                ElevatedButton(onClick = { /*TODO*/ }) {
+                ElevatedButton(onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(
+                            pagerState.currentPage - 1
+                        )
+                    }
+                }) {
                     Text(text = "Voltar")
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 ElevatedButton(onClick = {
-                    coroutineScope.launch {
+                    if (!isError) coroutineScope.launch {
                         pagerState.animateScrollToPage(
                             pagerState.currentPage + 1
                         )
                     }
                 }) {
-                    Text(text = "Avançar")
+                    Text(text = if (pagerState.currentPage == 2) "Salvar" else "Avançar")
                 }
             }
 
@@ -130,32 +142,52 @@ fun AddCipherPage(
 
 
 @Composable
-fun AddLetterCipherPage() {
+fun AddNameCipherPage(validateNameMusic: (String) -> Unit, isError: Boolean) {
     var artistName by remember { mutableStateOf("") }
     var musicName by remember { mutableStateOf("") }
-    Column {
+    val addCipherViewModel = hiltViewModel<AddCipherViewModel>()
+    Column(
+    ) {
         OutlinedTextField(
             value = artistName,
-            label = { Text("Artista") },
-            onValueChange = { value -> artistName = value },
+            label = { Text("Nome do Artista") },
+            onValueChange = { value ->
+                artistName = value
+                addCipherViewModel.state.value.cipher.artist = value
+            },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Default.Face, contentDescription = "Nome Artista"
+                    imageVector = Icons.Default.Face, contentDescription = "Nome do Artista"
                 )
             },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
-            label = { Text("Música") },
+            label = { Text(if (isError) "Nome da Música *" else "Nome da Música") },
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_music_note_24),
-                    contentDescription = "Nome Artista"
+                    contentDescription = "Nome da Música"
                 )
             },
+            isError = isError,
             value = musicName,
-            onValueChange = { value -> musicName = value },
+            onValueChange = { value ->
+                musicName = value
+                validateNameMusic.invoke(value)
+                addCipherViewModel.state.value.cipher.name = value
+            },
+            supportingText = {
+                if (isError) Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = md_theme_dark_onError,
+                    text = "Nome da música é obrigatório",
+                )
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                errorBorderColor = md_theme_dark_onError,
+            ),
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -163,33 +195,50 @@ fun AddLetterCipherPage() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTom(toms: List<TomEntity>) {
+fun AddTomPage(toms: List<TomEntity>, onSelect: (TomEntity) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedValue: TomEntity? by remember { mutableStateOf(null) }
+    val addCipherViewModel = hiltViewModel<AddCipherViewModel>()
+    var selectedValue: TomEntity? by remember { mutableStateOf(toms.firstOrNull()) }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {
         expanded = !expanded
     }) {
-        Row(
+        TextField(
             modifier = Modifier
                 .menuAnchor()
-                .width(120.dp)
-        ) {
-            Text(
-                selectedValue?.name ?: "",
-            )
-            Icon(
-                imageVector = Icons.Outlined.ArrowDropDown, contentDescription = "Open DropDown"
-            )
-        }
-
+                .fillMaxWidth(),
+            readOnly = true,
+            value = selectedValue?.name ?: "",
+            onValueChange = {},
+            label = { Text("Tom") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+        )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             toms.forEach { item ->
                 DropdownMenuItem(text = { Text(text = item.name) }, onClick = {
                     selectedValue = item
                     expanded = false
+                    addCipherViewModel.state.value.cipher.fkTom = item.id!!
+                    onSelect.invoke(item)
+
                 })
             }
         }
     }
 }
 
+@Composable
+fun AddLetterPage() {
+    val localConfiguration = LocalConfiguration.current
+    var letterMusic by remember { mutableStateOf("") }
+    Column(modifier = Modifier.imePadding()) {
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height = (localConfiguration.screenHeightDp * 0.68).dp),
+            value = letterMusic,
+            onValueChange = { letterMusic = it },
+            label = { Text("Letra da Música") },
+        )
+    }
+}

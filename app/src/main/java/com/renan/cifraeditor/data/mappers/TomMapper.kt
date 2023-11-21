@@ -1,4 +1,4 @@
-package com.renan.cifraeditor.data.dto
+package com.renan.cifraeditor.data.mappers
 
 import com.renan.cifraeditor.data.tables.Tom
 import com.renan.cifraeditor.domain.entities.TomEntity

@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Cipher(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: Int?=null,
     @ColumnInfo var name: String,
     @ColumnInfo var artist: String? = null,
     @ColumnInfo(name = "fk_tom") var fkTom: Int

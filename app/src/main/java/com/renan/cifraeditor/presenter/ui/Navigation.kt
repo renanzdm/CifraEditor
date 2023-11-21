@@ -22,7 +22,7 @@ fun AppNavigationHost(
     modifier: Modifier,
 ) {
     NavHost(navController = navController, startDestination = AppRoutes.addCipherRoute) {
-        composable(AppRoutes.addCipherRoute) { AddCipherPage(navController = navController) }
+        composable(AppRoutes.addCipherRoute) { AddCipherPage() }
         composable(AppRoutes.soundControlRoute) { SoundControlPage(navController = navController) }
     }
 }

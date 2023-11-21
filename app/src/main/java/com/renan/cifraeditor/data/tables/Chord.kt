@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Chord(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: Int?=null,
     @ColumnInfo var name: String,
     @ColumnInfo var degree: Int,
     @ColumnInfo(name = "fk_tom") val fkTom: Int

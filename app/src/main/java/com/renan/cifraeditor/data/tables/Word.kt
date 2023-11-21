@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Word(
-   @PrimaryKey val id:Int,
+   @PrimaryKey val id:Int?=null,
    @ColumnInfo  var name:String,
-    @ColumnInfo(name = "fk_chord") val fkChord:Int,
+    @ColumnInfo(name = "fk_chord") val fkChord:Int?,
    @ColumnInfo(name = "fk_chipher")  val fkChiper:Int
 )
