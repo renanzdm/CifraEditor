@@ -18,6 +18,8 @@ interface CipherDao {
 
     @Delete
     suspend fun delete(cipher: Cipher)
+    @Query("SELECT * FROM cipher WHERE cipher.id == :id")
+    suspend fun getById(id:Long):Cipher
 
 
 }

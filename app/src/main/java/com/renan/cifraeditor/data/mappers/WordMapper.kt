@@ -13,5 +13,4 @@ fun List<WordsEntity>.toWords(): List<Word> {
         )
     }
     return words
-
 }

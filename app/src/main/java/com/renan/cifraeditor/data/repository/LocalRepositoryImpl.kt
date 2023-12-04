@@ -1,8 +1,10 @@
 package com.renan.cifraeditor.data.repository
 
 import com.renan.cifraeditor.data.mappers.toCipher
+import com.renan.cifraeditor.data.mappers.toEntities
 import com.renan.cifraeditor.data.mappers.toEntity
 import com.renan.cifraeditor.data.mappers.toWords
+import com.renan.cifraeditor.data.tables.Cipher
 import com.renan.cifraeditor.domain.daos.CipherDao
 import com.renan.cifraeditor.domain.entities.TomEntity
 import com.renan.cifraeditor.domain.daos.TomDao
@@ -21,7 +23,7 @@ class LocalRepositoryImpl @Inject constructor(
     private val cipherDao: CipherDao,
     private val wordDao: WordDao,
 ) : LocalRepository {
-    override suspend fun getAll(): Resource<List<TomEntity>> {
+    override suspend fun getAllToms(): Resource<List<TomEntity>> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = tomDao.getAll()
@@ -31,6 +33,17 @@ class LocalRepositoryImpl @Inject constructor(
                     }
                 }
                 return@withContext Resource.Success(data = tomDao.getAll().toEntity())
+            } catch (e: Exception) {
+                return@withContext Resource.Error(message = e.localizedMessage ?: "")
+            }
+        }
+    }
+
+    override suspend fun getAllCiphers(): Resource<List<CipherEntity>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = cipherDao.getAll()
+                return@withContext Resource.Success(data = response.toEntities())
             } catch (e: Exception) {
                 return@withContext Resource.Error(message = e.localizedMessage ?: "")
             }
@@ -53,6 +66,17 @@ class LocalRepositoryImpl @Inject constructor(
             try {
                 wordDao.insertAllWords(words.toWords())
                 return@withContext Resource.Success("Inserido com Sucesso")
+            } catch (ex: Exception) {
+                return@withContext Resource.Error(ex.message ?: "")
+            }
+        }
+    }
+
+    override suspend fun getCipherById(id: Long): Resource<CipherEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val cipher: Cipher = cipherDao.getById(id)
+                return@withContext Resource.Success(cipher.toEntity())
             } catch (ex: Exception) {
                 return@withContext Resource.Error(ex.message ?: "")
             }

@@ -29,9 +29,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,9 +51,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.example.compose.md_theme_dark_onError
 import com.renan.cifraeditor.R
 import com.renan.cifraeditor.domain.entities.TomEntity
+import com.renan.cifraeditor.presenter.ui.AppRoutes
+import com.renan.cifraeditor.presenter.ui.components.AppSnackBarHost
 import com.renan.cifraeditor.presenter.ui.components.AppTopBar
 import kotlinx.coroutines.launch
 
@@ -59,43 +64,51 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AddCipherPage(
-    addCipherViewModel: AddCipherViewModel = hiltViewModel(),
+    addCipherViewModel: AddCipherViewModel = hiltViewModel(), navController: NavController
 ) {
+    val snackHost = remember { SnackbarHostState() }
     val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 0)
     val uiState = addCipherViewModel.state.collectAsStateWithLifecycle()
-    val localConfiguration = LocalConfiguration.current
     var isError by rememberSaveable { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(key1 = uiState.value.errorMessage, key2 = uiState.value.idCipherCreated) {
+        if (uiState.value.errorMessage?.isNotEmpty() == true) snackHost.showSnackbar(
+            message = uiState.value.errorMessage ?: ""
+        )
+        if (uiState.value.idCipherCreated != null) {
+            navController.navigate("${AppRoutes.cipherDetailsRoute}/${uiState.value.idCipherCreated}")
+        }
+    }
     LifecycleStartEffect(lifecycleOwner = LocalLifecycleOwner.current) {
         addCipherViewModel.getAllToms()
         onStopOrDispose { }
     }
-    Scaffold(topBar = {
+    Scaffold(snackbarHost = { AppSnackBarHost(hostState = snackHost) }, topBar = {
         AppTopBar(title = "Nova Cifra")
     }) { padding ->
         Column(
             modifier = Modifier
-                .height(height = localConfiguration.screenHeightDp.dp)
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp)
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .imePadding()
         ) {
             HorizontalPager(
                 state = pagerState,
                 userScrollEnabled = false,
                 verticalAlignment = Alignment.Top,
-                contentPadding = padding
             ) { page ->
                 when (page) {
-                    0 -> AddNameCipherPage(
-                        validateNameMusic = { isError = addCipherViewModel.validateNameMusic(it) },
-                        isError = isError
-                    )
-
-                    1 -> AddTomPage(toms = uiState.value.allToms, onSelect = {})
+                    0 -> AddNameCipherPage(isError = isError)
+                    1 -> AddTomPage(toms = uiState.value.allToms)
                     2 -> AddLetterPage()
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .weight(1f),
+            )
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -126,10 +139,12 @@ fun AddCipherPage(
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 ElevatedButton(onClick = {
-                    if (!isError) coroutineScope.launch {
-                        pagerState.animateScrollToPage(
-                            pagerState.currentPage + 1
-                        )
+                    isError = addCipherViewModel.validateNameMusic()
+                    coroutineScope.launch {
+                        if (!isError) pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                        if (pagerState.currentPage == 2) addCipherViewModel.saveCipher()
+
+
                     }
                 }) {
                     Text(text = if (pagerState.currentPage == 2) "Salvar" else "Avançar")
@@ -142,27 +157,12 @@ fun AddCipherPage(
 
 
 @Composable
-fun AddNameCipherPage(validateNameMusic: (String) -> Unit, isError: Boolean) {
+fun AddNameCipherPage(isError: Boolean) {
     var artistName by remember { mutableStateOf("") }
     var musicName by remember { mutableStateOf("") }
     val addCipherViewModel = hiltViewModel<AddCipherViewModel>()
     Column(
     ) {
-        OutlinedTextField(
-            value = artistName,
-            label = { Text("Nome do Artista") },
-            onValueChange = { value ->
-                artistName = value
-                addCipherViewModel.state.value.cipher.artist = value
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Face, contentDescription = "Nome do Artista"
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             label = { Text(if (isError) "Nome da Música *" else "Nome da Música") },
             leadingIcon = {
@@ -175,8 +175,7 @@ fun AddNameCipherPage(validateNameMusic: (String) -> Unit, isError: Boolean) {
             value = musicName,
             onValueChange = { value ->
                 musicName = value
-                validateNameMusic.invoke(value)
-                addCipherViewModel.state.value.cipher.name = value
+                addCipherViewModel.setNameMusic(value)
             },
             supportingText = {
                 if (isError) Text(
@@ -190,12 +189,28 @@ fun AddNameCipherPage(validateNameMusic: (String) -> Unit, isError: Boolean) {
             ),
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = artistName,
+            label = { Text("Nome do Artista") },
+            onValueChange = { value ->
+                artistName = value
+                addCipherViewModel.setNameArtist(value)
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Face, contentDescription = "Nome do Artista"
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTomPage(toms: List<TomEntity>, onSelect: (TomEntity) -> Unit) {
+fun AddTomPage(toms: List<TomEntity>) {
     var expanded by remember { mutableStateOf(false) }
     val addCipherViewModel = hiltViewModel<AddCipherViewModel>()
     var selectedValue: TomEntity? by remember { mutableStateOf(toms.firstOrNull()) }
@@ -218,9 +233,7 @@ fun AddTomPage(toms: List<TomEntity>, onSelect: (TomEntity) -> Unit) {
                 DropdownMenuItem(text = { Text(text = item.name) }, onClick = {
                     selectedValue = item
                     expanded = false
-                    addCipherViewModel.state.value.cipher.fkTom = item.id!!
-                    onSelect.invoke(item)
-
+                    addCipherViewModel.setTom(item.id!!)
                 })
             }
         }
@@ -231,14 +244,20 @@ fun AddTomPage(toms: List<TomEntity>, onSelect: (TomEntity) -> Unit) {
 fun AddLetterPage() {
     val localConfiguration = LocalConfiguration.current
     var letterMusic by remember { mutableStateOf("") }
+    val addCipherViewModel = hiltViewModel<AddCipherViewModel>()
     Column(modifier = Modifier.imePadding()) {
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(height = (localConfiguration.screenHeightDp * 0.68).dp),
             value = letterMusic,
-            onValueChange = { letterMusic = it },
+            onValueChange = {
+                letterMusic = it
+                addCipherViewModel.setLetterMusic(letterMusic)
+            },
             label = { Text("Letra da Música") },
         )
     }
 }
+
+

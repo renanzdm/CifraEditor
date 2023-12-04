@@ -9,6 +9,9 @@ data class AddCipherState(
     var loading: Boolean = false,
     var allToms: List<TomEntity> = emptyList(),
     var errorMessage: String? = null,
-    var cipher: CipherEntity = CipherEntity(name = "", artist = "", fkTom = 1),
-    var words: List<WordsEntity> = emptyList()
+    var nameMusic: String? = null,
+    var nameArtist: String? = null,
+    var idTom: Long = 0,
+    var letterMusic: String? = null,
+    var idCipherCreated:Long?=null
 )

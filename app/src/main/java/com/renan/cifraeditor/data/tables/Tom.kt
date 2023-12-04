@@ -6,6 +6,6 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Tom(
-    @PrimaryKey val id: Int?=null,
+    @PrimaryKey val id: Long?=null,
     @ColumnInfo val name:String
 )

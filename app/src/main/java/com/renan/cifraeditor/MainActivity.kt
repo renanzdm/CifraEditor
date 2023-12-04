@@ -32,6 +32,7 @@ import com.renan.cifraeditor.presenter.ui.theme.CifraEditorTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,13 +43,9 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    Scaffold(bottomBar = { BottomButtons(navController = navController) }) { paddingValues ->
+                    Scaffold {  paddingValues ->
                         AppNavigationHost(
-                            navController = navController,
-                            modifier = Modifier
-                                .padding(paddingValues)
-
-                        )
+                            navController = navController)
                     }
                 }
             }
