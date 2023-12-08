@@ -1,6 +1,5 @@
 package com.renan.cifraeditor.domain.di
 
-import com.renan.cifraeditor.data.tables.Word
 import com.renan.cifraeditor.domain.daos.CipherDao
 import com.renan.cifraeditor.domain.database.CifraEditorDatabase
 import com.renan.cifraeditor.domain.daos.TomDao

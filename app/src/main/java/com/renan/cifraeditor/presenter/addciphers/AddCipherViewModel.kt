@@ -4,11 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.renan.cifraeditor.data.repository.LocalRepositoryImpl
-import com.renan.cifraeditor.domain.entities.CipherEntity
-import com.renan.cifraeditor.domain.entities.WordsEntity
+import com.renan.cifraeditor.domain.entities.tables.Cipher
+import com.renan.cifraeditor.domain.entities.tables.Word
 import com.renan.cifraeditor.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -73,19 +72,19 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
     }
 
 
-    private fun setWords(letter: String, idCipher: Long): List<WordsEntity> {
+    private fun setWords(letter: String, idCipher: Long): List<Word> {
         val anySpacesRemoved = letter.trimIndent().replace(Regex("\\s+"), " ")
         val listWords: List<String> = anySpacesRemoved.split(" ")
         return listWords.map { word ->
-            WordsEntity(name = word, fkChiper = idCipher)
+            Word(wordName = word, fkChiper = idCipher)
         }
     }
 
-    fun saveCipher(): Job {
-        return viewModelScope.launch {
-            val cipher = CipherEntity(
-                name = _state.value.nameMusic!!,
-                artist = _state.value.nameArtist,
+    fun saveCipher() {
+        viewModelScope.launch {
+            val cipher = Cipher(
+                cipherName = _state.value.nameMusic!!,
+                cipherArtist = _state.value.nameArtist,
                 fkTom = _state.value.idTom
             )
 

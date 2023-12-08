@@ -4,8 +4,9 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.renan.cifraeditor.data.tables.Cipher
-import com.renan.cifraeditor.data.tables.Tom
+import androidx.room.Transaction
+import com.renan.cifraeditor.domain.entities.entitiesrelations.CipherWithWordsAndChords
+import com.renan.cifraeditor.domain.entities.tables.Cipher
 
 @Dao
 interface CipherDao {
@@ -14,12 +15,13 @@ interface CipherDao {
     suspend fun getAll(): List<Cipher>
 
     @Insert
-    suspend fun insert(cipher: Cipher):Long
+    suspend fun insert(cipher: Cipher): Long
 
     @Delete
     suspend fun delete(cipher: Cipher)
-    @Query("SELECT * FROM cipher WHERE cipher.id == :id")
-    suspend fun getById(id:Long):Cipher
+    @Transaction
+    @Query("SELECT * FROM cipher WHERE cipher.cipherId == :id")
+    suspend fun getById(id: Long): CipherWithWordsAndChords
 
 
 }

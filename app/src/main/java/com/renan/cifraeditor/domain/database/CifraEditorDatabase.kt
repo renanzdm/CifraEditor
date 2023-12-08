@@ -1,21 +1,20 @@
 package com.renan.cifraeditor.domain.database
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.renan.cifraeditor.data.tables.Chord
-import com.renan.cifraeditor.data.tables.Cipher
-import com.renan.cifraeditor.data.tables.Tom
-import com.renan.cifraeditor.data.tables.Word
+import com.renan.cifraeditor.domain.entities.tables.Chord
+import com.renan.cifraeditor.domain.entities.tables.Cipher
+import com.renan.cifraeditor.domain.entities.tables.Tom
+import com.renan.cifraeditor.domain.entities.tables.Word
 import com.renan.cifraeditor.domain.daos.CipherDao
 import com.renan.cifraeditor.domain.daos.TomDao
 import com.renan.cifraeditor.domain.daos.WordDao
-import com.renan.cifraeditor.domain.entities.TomEntity
+import com.renan.cifraeditor.domain.entities.tables.WordChordCrossReference
 
 @Database(
-    entities = [Tom::class,Cipher::class,Word::class,Chord::class],
+    entities = [Tom::class, Cipher::class, Word::class, Chord::class, WordChordCrossReference::class],
     version = 1,
-    exportSchema = true,
+    exportSchema = false,
 )
 abstract class CifraEditorDatabase : RoomDatabase() {
     abstract fun tomDao(): TomDao
@@ -49,4 +48,5 @@ val toms: List<Tom> = listOf(
     Tom(21, "G#m"),
     Tom(22, "Am"),
     Tom(23, "A#m"),
-    Tom(24, "Bm"))
+    Tom(24, "Bm")
+)

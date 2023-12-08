@@ -4,8 +4,9 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.renan.cifraeditor.data.tables.Cipher
-import com.renan.cifraeditor.data.tables.Word
+import com.renan.cifraeditor.domain.entities.tables.Word
+import com.renan.cifraeditor.domain.entities.tables.WordChordCrossReference
+
 @Dao
 interface WordDao {
 
@@ -20,5 +21,9 @@ interface WordDao {
     suspend fun delete(word: Word)
 
     @Insert
-    suspend fun insertAllWords(word: List<Word>)
+    suspend fun insertAllWords(word: List<Word>):List<Long>
+
+    @Insert
+    suspend fun insertAllWordsChords(word: List<WordChordCrossReference>):List<Long>
+
 }

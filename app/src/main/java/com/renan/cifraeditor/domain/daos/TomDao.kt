@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.renan.cifraeditor.data.tables.Tom
+import com.renan.cifraeditor.domain.entities.tables.Tom
 @Dao
 interface TomDao {
     @Query("SELECT * FROM tom")

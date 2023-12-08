@@ -54,7 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.compose.md_theme_dark_onError
 import com.renan.cifraeditor.R
-import com.renan.cifraeditor.domain.entities.TomEntity
+import com.renan.cifraeditor.domain.entities.tables.Tom
 import com.renan.cifraeditor.presenter.ui.AppRoutes
 import com.renan.cifraeditor.presenter.ui.components.AppSnackBarHost
 import com.renan.cifraeditor.presenter.ui.components.AppTopBar
@@ -72,11 +72,20 @@ fun AddCipherPage(
     var isError by rememberSaveable { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(key1 = uiState.value.errorMessage, key2 = uiState.value.idCipherCreated) {
-        if (uiState.value.errorMessage?.isNotEmpty() == true) snackHost.showSnackbar(
-            message = uiState.value.errorMessage ?: ""
-        )
+        if (uiState.value.errorMessage?.isNotEmpty() == true) {
+            snackHost.showSnackbar(
+                message = uiState.value.errorMessage ?: ""
+            )
+        }
         if (uiState.value.idCipherCreated != null) {
-            navController.navigate("${AppRoutes.cipherDetailsRoute}/${uiState.value.idCipherCreated}")
+            val route: String = AppRoutes.replaceParam(
+                route = AppRoutes.cipherDetailsRoute,
+                nameParam = "id",
+                value = uiState.value.idCipherCreated
+            )
+            navController.navigate(route) {
+                popUpTo(AppRoutes.homeRoute)
+            }
         }
     }
     LifecycleStartEffect(lifecycleOwner = LocalLifecycleOwner.current) {
@@ -138,16 +147,19 @@ fun AddCipherPage(
                     Text(text = "Voltar")
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                ElevatedButton(onClick = {
-                    isError = addCipherViewModel.validateNameMusic()
-                    coroutineScope.launch {
-                        if (!isError) pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                        if (pagerState.currentPage == 2) addCipherViewModel.saveCipher()
-
-
-                    }
-                }) {
-                    Text(text = if (pagerState.currentPage == 2) "Salvar" else "Avançar")
+                if (pagerState.currentPage == 2) {
+                    ElevatedButton(onClick = {
+                        coroutineScope.launch { addCipherViewModel.saveCipher() }
+                    }, content = { Text(text = "Salvar") })
+                } else {
+                    ElevatedButton(onClick = {
+                        isError = addCipherViewModel.validateNameMusic()
+                        coroutineScope.launch {
+                            if (!isError) pagerState.animateScrollToPage(
+                                pagerState.currentPage + 1
+                            )
+                        }
+                    }, content = { Text(text = "Avançar") })
                 }
             }
 
@@ -163,8 +175,7 @@ fun AddNameCipherPage(isError: Boolean) {
     val addCipherViewModel = hiltViewModel<AddCipherViewModel>()
     Column(
     ) {
-        OutlinedTextField(
-            label = { Text(if (isError) "Nome da Música *" else "Nome da Música") },
+        OutlinedTextField(label = { Text(if (isError) "Nome da Música *" else "Nome da Música") },
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_music_note_24),
@@ -190,8 +201,7 @@ fun AddNameCipherPage(isError: Boolean) {
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = artistName,
+        OutlinedTextField(value = artistName,
             label = { Text("Nome do Artista") },
             onValueChange = { value ->
                 artistName = value
@@ -210,10 +220,10 @@ fun AddNameCipherPage(isError: Boolean) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTomPage(toms: List<TomEntity>) {
+fun AddTomPage(toms: List<Tom>) {
     var expanded by remember { mutableStateOf(false) }
     val addCipherViewModel = hiltViewModel<AddCipherViewModel>()
-    var selectedValue: TomEntity? by remember { mutableStateOf(toms.firstOrNull()) }
+    var selectedValue: Tom? by remember { mutableStateOf(toms.firstOrNull()) }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {
         expanded = !expanded
     }) {
@@ -222,7 +232,7 @@ fun AddTomPage(toms: List<TomEntity>) {
                 .menuAnchor()
                 .fillMaxWidth(),
             readOnly = true,
-            value = selectedValue?.name ?: "",
+            value = selectedValue?.tomName ?: "",
             onValueChange = {},
             label = { Text("Tom") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -230,10 +240,10 @@ fun AddTomPage(toms: List<TomEntity>) {
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             toms.forEach { item ->
-                DropdownMenuItem(text = { Text(text = item.name) }, onClick = {
+                DropdownMenuItem(text = { Text(text = item.tomName) }, onClick = {
                     selectedValue = item
                     expanded = false
-                    addCipherViewModel.setTom(item.id!!)
+                    addCipherViewModel.setTom(item.tomId!!)
                 })
             }
         }

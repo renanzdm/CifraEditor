@@ -6,7 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.renan.cifraeditor.presenter.cipherDetails.CipherDetailsPage
+import com.renan.cifraeditor.presenter.cipherdetails.CipherDetailsPage
 import com.renan.cifraeditor.presenter.addciphers.AddCipherPage
 import com.renan.cifraeditor.presenter.home.HomePage
 import com.renan.cifraeditor.presenter.soundcontrol.SoundControlPage

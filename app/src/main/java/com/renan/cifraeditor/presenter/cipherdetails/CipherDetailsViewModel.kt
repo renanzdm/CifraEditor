@@ -1,4 +1,4 @@
-package com.renan.cifraeditor.presenter.cipherDetails
+package com.renan.cifraeditor.presenter.cipherdetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,10 +14,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl: LocalRepositoryImpl) :
     ViewModel() {
-
     private val _state = MutableStateFlow(CipherDetailsState())
     var state = _state.asStateFlow()
-
     fun getCipherById(id: Long) {
         _state.update {
             it.copy(
@@ -30,14 +28,14 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
                     val cipher = res.data!!
                     _state.update {
                         it.copy(
-                            name = cipher.name,
-                            idCipher = cipher.id,
-                            artist = cipher.artist,
-                            fkTom = cipher.fkTom
+                            name = cipher.cipher.cipherName,
+                            idCipher = cipher.cipher.cipherId,
+                            artist = cipher.cipher.cipherArtist,
+                            fkTom = cipher.cipher.fkTom,
+                            words =cipher.words
                         )
                     }
                 }
-
                 is Resource.Error -> {
                     _state.update {
                         it.copy(
@@ -46,10 +44,7 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
                     }
                 }
             }
-
         }
-
-
     }
 
 }

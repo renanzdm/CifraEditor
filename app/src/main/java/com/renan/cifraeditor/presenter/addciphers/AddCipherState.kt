@@ -1,13 +1,10 @@
 package com.renan.cifraeditor.presenter.addciphers
 
-import com.renan.cifraeditor.data.tables.Word
-import com.renan.cifraeditor.domain.entities.CipherEntity
-import com.renan.cifraeditor.domain.entities.TomEntity
-import com.renan.cifraeditor.domain.entities.WordsEntity
+import com.renan.cifraeditor.domain.entities.tables.Tom
 
 data class AddCipherState(
     var loading: Boolean = false,
-    var allToms: List<TomEntity> = emptyList(),
+    var allToms: List<Tom> = emptyList(),
     var errorMessage: String? = null,
     var nameMusic: String? = null,
     var nameArtist: String? = null,
