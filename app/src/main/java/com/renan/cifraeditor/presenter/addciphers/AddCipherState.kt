@@ -9,7 +9,6 @@ data class AddCipherState(
     var nameMusic: String? = null,
     var nameArtist: String? = null,
     var idTom: Long = 0,
-
     var letterMusic: String? = null,
-    var idCipherCreated:Long?=null
+    var idCipherCreated: Long? = null
 )

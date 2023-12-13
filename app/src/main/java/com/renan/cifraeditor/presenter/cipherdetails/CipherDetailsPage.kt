@@ -1,25 +1,17 @@
 package com.renan.cifraeditor.presenter.cipherdetails
 
+import com.renan.cifraeditor.presenter.ui.components.flow_column_builder.CustomLazyLayout
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -28,18 +20,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.renan.cifraeditor.domain.entities.entitiesrelations.WordWithChords
+import com.renan.cifraeditor.presenter.ui.components.flow_column_builder.rememberLazyLayoutState
 
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-
 fun CipherDetailsPage(
-    navController: NavController,
-    cipherDetailsViewModel: CipherDetailsViewModel = hiltViewModel(),
-    idCipher: Long?
+    cipherDetailsViewModel: CipherDetailsViewModel = hiltViewModel(), idCipher: Long?
 ) {
+    val lazyLayoutState = rememberLazyLayoutState()
 
     val uiState = cipherDetailsViewModel.state.collectAsStateWithLifecycle()
     LifecycleStartEffect(lifecycleOwner = LocalLifecycleOwner.current) {
@@ -51,6 +40,7 @@ fun CipherDetailsPage(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .padding(pdv)
+                .fillMaxSize()
         ) {
             Box(modifier = Modifier.height(40.dp))
             Text(
@@ -61,13 +51,11 @@ fun CipherDetailsPage(
             Text(
                 text = uiState.value.artist ?: "", style = TextStyle(color = Color.White)
             )
-            FlowRow(maxItemsInEachRow = 6) {
-                uiState.value.words.forEach {
-                    WordCard(entity = it)
+            CustomLazyLayout(state = lazyLayoutState, modifier = Modifier.fillMaxSize()) {
+                items(items = uiState.value.words) { index ->
+                    WordCard(entity = uiState.value.words[index])
                 }
             }
-
-
         }
     }
 }
@@ -78,19 +66,17 @@ fun WordCard(entity: WordWithChords) {
     Column(modifier = Modifier.clickable {
         println("PRINTOU")
     }) {
-//        Row {
-//            listOf("C", "D").map {
-//                Text(
-//                    text = "C",
-//                    style = TextStyle(color = Color.Yellow),
-//                    modifier = Modifier.padding(horizontal = 4.dp)
-//                )
-//            }
-//        }
+        Text(
+            text = "C",
+            style = TextStyle(color = Color.Yellow),
+        )
         Text(
             text = entity.word.wordName.trimIndent(), modifier = Modifier.padding(horizontal = 1.dp)
         )
     }
-
-
 }
+
+
+
+
+

@@ -17,7 +17,7 @@ sealed class AppRoutes {
         const val soundControlRoute: String = "sound-control"
         const val cipherDetailsRoute: String = "cipher-details-route/{id}"
         const val homeRoute: String = "home-route"
-        fun <T> replaceParam(route:String,value:T,nameParam:String): String {
+        fun <T> replaceParam(route: String, value: T, nameParam: String): String {
             return route.replace(oldValue = "{$nameParam}", newValue = value.toString())
         }
     }
@@ -37,7 +37,7 @@ fun AppNavigationHost(
             AppRoutes.cipherDetailsRoute,
             arguments = listOf(navArgument("id") { type = NavType.LongType })
         ) {
-            CipherDetailsPage(navController = navController, idCipher = it.arguments?.getLong("id"))
+            CipherDetailsPage(idCipher = it.arguments?.getLong("id"))
         }
     }
 }
