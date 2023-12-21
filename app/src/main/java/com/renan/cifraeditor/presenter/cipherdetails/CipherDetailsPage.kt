@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
@@ -58,19 +61,20 @@ fun CipherDetailsPage(
                     color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold
                 )
             )
-            Text(
-                text = uiState.value.artist ?: "", style = TextStyle(color = Color.White)
-            )
-            FlowRow(maxItemsInEachRow = 6) {
-                uiState.value.words.forEach {
-                    WordCard(entity = it)
+            Text(text = uiState.value.artist ?: "", style = TextStyle(color = Color.White))
+            LazyColumn {
+                items(items = uiState.value.wordsFormatted) { items ->
+                    FlowRow {
+                        items.map { WordCard(entity = it) }
+                    }
                 }
-            }
 
+            }
 
         }
     }
 }
+
 
 
 @Composable
@@ -78,17 +82,17 @@ fun WordCard(entity: WordWithChords) {
     Column(modifier = Modifier.clickable {
         println("PRINTOU")
     }) {
-//        Row {
-//            listOf("C", "D").map {
-//                Text(
-//                    text = "C",
-//                    style = TextStyle(color = Color.Yellow),
-//                    modifier = Modifier.padding(horizontal = 4.dp)
-//                )
-//            }
-//        }
+       LazyRow{
+           items(items = entity.chords){
+               Text(
+                   text = it!!.chordName,
+                   style = TextStyle(color = Color.Yellow),
+                   modifier = Modifier.padding(horizontal = 4.dp)
+               )
+           }
+       }
         Text(
-            text = entity.word.wordName.trimIndent(), modifier = Modifier.padding(horizontal = 1.dp)
+            text = entity.word.wordName, modifier = Modifier.padding(horizontal = 1.dp)
         )
     }
 

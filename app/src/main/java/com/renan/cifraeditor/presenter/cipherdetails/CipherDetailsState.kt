@@ -10,5 +10,6 @@ data class CipherDetailsState(
     var name:String?=null,
     var artist:String?=null ,
     var fkTom:Long?=null,
-    var words:List<WordWithChords> = emptyList()
+    var words:List<WordWithChords> = emptyList(),
+    var wordsFormatted:List<List<WordWithChords>> = emptyList()
 )
