@@ -1,8 +1,10 @@
 package com.renan.cifraeditor.domain.di
 
+import com.renan.cifraeditor.domain.daos.ChordDao
 import com.renan.cifraeditor.domain.daos.CipherDao
 import com.renan.cifraeditor.domain.database.CifraEditorDatabase
 import com.renan.cifraeditor.domain.daos.TomDao
+import com.renan.cifraeditor.domain.daos.WordChordCrossReferenceDao
 import com.renan.cifraeditor.domain.daos.WordDao
 import dagger.Module
 import dagger.Provides
@@ -29,5 +31,16 @@ class DatabaseModule {
     @Singleton
     fun provideWordsDao(appDatabase: CifraEditorDatabase): WordDao {
         return appDatabase.wordsDao()
+    }
+    @Provides
+    @Singleton
+    fun provideChordsDao(appDatabase: CifraEditorDatabase): ChordDao {
+        return appDatabase.chordDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWordChordsReference(appDatabase: CifraEditorDatabase): WordChordCrossReferenceDao {
+        return appDatabase.wordChordCrossReferenceDao()
     }
 }

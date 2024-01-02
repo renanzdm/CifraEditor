@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Word(
-    @PrimaryKey val wordId: Int? = null,
+    @PrimaryKey val wordId: Long? = null,
     @ColumnInfo var wordName: String,
     @ColumnInfo val fkChiper: Long
 )

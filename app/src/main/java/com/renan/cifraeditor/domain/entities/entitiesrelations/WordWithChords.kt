@@ -13,5 +13,5 @@ data class WordWithChords(
         entityColumn = "chordId",
         associateBy = Junction(WordChordCrossReference::class),
     )
-    val chords:List<Chord>
+    val chords:List<Chord>?
 )

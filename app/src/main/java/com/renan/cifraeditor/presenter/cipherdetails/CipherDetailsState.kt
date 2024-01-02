@@ -1,6 +1,7 @@
 package com.renan.cifraeditor.presenter.cipherdetails
 
 import com.renan.cifraeditor.domain.entities.entitiesrelations.WordWithChords
+import com.renan.cifraeditor.domain.entities.tables.Chord
 import com.renan.cifraeditor.domain.entities.tables.Word
 
 data class CipherDetailsState(
@@ -11,5 +12,6 @@ data class CipherDetailsState(
     var artist:String?=null ,
     var fkTom:Long?=null,
     var words:List<WordWithChords> = emptyList(),
-    var wordsFormatted:List<List<WordWithChords>> = emptyList()
+    var wordsFormatted:List<List<WordWithChords>>? =null,
+    var chords :List<Chord>? = null
 )

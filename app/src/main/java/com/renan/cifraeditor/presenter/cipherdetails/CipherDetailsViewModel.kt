@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.renan.cifraeditor.data.repository.LocalRepositoryImpl
 import com.renan.cifraeditor.domain.entities.entitiesrelations.WordWithChords
+import com.renan.cifraeditor.domain.entities.tables.Chord
+import com.renan.cifraeditor.domain.entities.tables.Word
+import com.renan.cifraeditor.domain.entities.tables.WordChordCrossReference
 import com.renan.cifraeditor.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,11 +37,12 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
                             artist = cipher.cipher.cipherArtist,
                             fkTom = cipher.cipher.fkTom,
                             words = cipher.words,
-                            wordsFormatted = splitListWords(cipher.words)
+                            wordsFormatted = cipher.words.chunked(5)
                         )
                     }
-                }
+                    getChordsByTom(idTom = cipher.cipher.fkTom)
 
+                }
                 is Resource.Error -> {
                     _state.update {
                         it.copy(
@@ -50,14 +54,53 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
         }
     }
 
-    private fun splitListWords(
-        words: List<WordWithChords>, sizeSubList: Int = 5
-    ): List<List<WordWithChords>> {
-        val sublistas = mutableListOf<List<WordWithChords>>()
-        for (i in words.indices step sizeSubList) {
-            sublistas.add(words.subList(i, i + sizeSubList))
+    private fun getChordsByTom(idTom: Long) {
+        _state.update {
+            it.copy(
+                loading = true,
+            )
         }
-        return sublistas
+        viewModelScope.launch {
+            when (val response = localRepositoryImpl.getChordsByTom(id = idTom)) {
+                is Resource.Success -> {
+                    _state.update {
+                        it.copy(
+                            loading = false, chords = response.data
+                        )
+                    }
+                }
+
+                is Resource.Error -> {
+                    _state.update {
+                        it.copy(
+                            loading = false, chords = response.data
+                        )
+                    }
+                }
+            }
+        }
     }
 
+    fun updateWordChordCrossReference(word: Word, chord: Chord) {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    loading = true,
+                )
+            }
+            localRepositoryImpl.updateWordChordCrossReference(
+                entity = WordChordCrossReference(
+                    chordId = chord.chordId,
+                    wordId = word.wordId
+                )
+            )
+            _state.update {
+                it.copy(
+                    loading = false,
+                )
+            }
+        }
+
+
+    }
 }

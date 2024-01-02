@@ -17,6 +17,19 @@ class HomePageViewModel @Inject constructor(val localRepository: LocalRepository
     ViewModel() {
     private val _state = MutableStateFlow(HomePageState())
     var state = _state.asStateFlow()
+
+
+
+
+    fun initDataInitialDatabase(){
+        viewModelScope.launch {
+            localRepository.initDatabaseDataInitial()
+        }
+
+
+    }
+
+
     fun getCiphers() {
         viewModelScope.launch {
             _state.update {

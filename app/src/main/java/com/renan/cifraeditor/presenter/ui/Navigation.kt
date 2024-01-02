@@ -37,7 +37,7 @@ fun AppNavigationHost(
             AppRoutes.cipherDetailsRoute,
             arguments = listOf(navArgument("id") { type = NavType.LongType })
         ) {
-            CipherDetailsPage(navController = navController, idCipher = it.arguments?.getLong("id"))
+            CipherDetailsPage(idCipher = it.arguments?.getLong("id"))
         }
     }
 }

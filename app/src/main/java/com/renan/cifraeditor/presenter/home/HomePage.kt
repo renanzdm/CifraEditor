@@ -39,6 +39,7 @@ import com.renan.cifraeditor.presenter.ui.AppRoutes
 fun HomePage(homeViewModel: HomePageViewModel = hiltViewModel(), navController: NavController) {
     val uiState = homeViewModel.state.collectAsStateWithLifecycle()
     LifecycleStartEffect(lifecycleOwner = LocalLifecycleOwner.current) {
+        homeViewModel.initDataInitialDatabase()
         homeViewModel.getCiphers()
         onStopOrDispose { }
     }
