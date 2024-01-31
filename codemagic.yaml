@@ -1,5 +1,4 @@
 workflows:
-  version: 2
   build_and_publish:
     name: Build and Publish
     scripts:
