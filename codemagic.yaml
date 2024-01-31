@@ -1,6 +1,9 @@
 workflows:
   build_and_publish:
     name: Build and Publish
+    environment:
+      android_signing:
+        - keystore_reference
     scripts:
       - echo "Building the app"
       - ./gradlew build
