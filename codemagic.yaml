@@ -4,6 +4,7 @@ workflows:
     environment:
       android_signing:
         - cifraeditorkeys
+      java: 17
     scripts:
       - echo "Building the app"
       - ./gradlew build
