@@ -1,0 +1,12 @@
+workflows:
+  version: 2
+  build_and_publish:
+    name: Build and Publish
+    scripts:
+      - echo "Building the app"
+      - ./gradlew build
+      - echo "Publishing the app"
+      - ./gradlew bundleRelease # ou ./gradlew assembleRelease, dependendo da sua configuração
+    artifacts:
+      - build/app/outputs/bundle/release/app-release.aab
+
