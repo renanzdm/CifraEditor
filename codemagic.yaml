@@ -20,5 +20,14 @@ workflows:
       - ./gradlew bundleRelease
     artifacts:
       - build/app/outputs/bundle/release/app-release.aab
+  publishing:
+
+    email:
+      recipients:
+        - renanzdm@gmailcom
+    google_play:
+      credentials: $gcp_key
+      track: internal
+
 
 
