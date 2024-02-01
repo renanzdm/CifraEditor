@@ -21,7 +21,7 @@ android {
     compileSdk = 34
     defaultConfig {
         applicationId = "com.renan.cifraeditor"
-        minSdk = 30
+        minSdk = 24
         targetSdk = 34
         versionCode = 3
         versionName = "1.3"
