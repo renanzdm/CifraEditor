@@ -21,7 +21,7 @@ workflows:
       - echo "Publishing the app"
       - ./gradlew bundleRelease
     artifacts:
-      - build/app/outputs/bundle/release/app-release.aab
+      - app/build/outputs/**/*.aab
     publishing:
       google_play:
         credentials: $gcp_key
