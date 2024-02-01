@@ -25,6 +25,10 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
         return _state.value.nameMusic?.isEmpty() ?: true
     }
 
+    fun validateLetterMusic(): Boolean {
+        return _state.value.letterMusic?.isEmpty() ?: true
+    }
+
     fun setNameMusic(name: String) {
         _state.update {
             it.copy(nameMusic = name)
@@ -60,6 +64,11 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
 
     fun saveCipher() {
         viewModelScope.launch {
+            _state.update {
+                it.copy(loading = true)
+            }
+
+
             val cipher = Cipher(
                 cipherName = _state.value.nameMusic!!,
                 cipherArtist = _state.value.nameArtist,
@@ -75,7 +84,7 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
                         Log.e("SUCESSO", resultSaveWords.data ?: "")
                         _state.update {
                             it.copy(
-                                idCipherCreated = result.data
+                                idCipherCreated = result.data, loading = false
                             )
                         }
                     }
@@ -85,7 +94,7 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
                     Log.e("ERRO AO SALVAR CIFRA", result.message ?: "")
                     _state.update {
                         it.copy(
-                            idCipherCreated = null
+                            idCipherCreated = null, loading = false
                         )
                     }
                 }

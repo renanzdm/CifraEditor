@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.compose.md_theme_dark_outlineVariant
+import com.renan.cifraeditor.presenter.ui.theme.md_theme_dark_outlineVariant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

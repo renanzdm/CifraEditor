@@ -56,13 +56,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.compose.md_theme_dark_outlineVariant
 import com.renan.cifraeditor.domain.database.allToms
 import com.renan.cifraeditor.domain.entities.entitiesrelations.WordWithChords
 import com.renan.cifraeditor.domain.entities.tables.Chord
 import com.renan.cifraeditor.domain.entities.tables.Tom
 import com.renan.cifraeditor.presenter.ui.components.CustomTopAppBar
 import com.renan.cifraeditor.presenter.ui.components.ModalConfirmButton
+import com.renan.cifraeditor.presenter.ui.theme.md_theme_dark_outlineVariant
 import kotlinx.coroutines.launch
 
 

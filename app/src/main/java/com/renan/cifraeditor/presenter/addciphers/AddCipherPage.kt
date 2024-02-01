@@ -1,6 +1,7 @@
 package com.renan.cifraeditor.presenter.addciphers
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,13 +54,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.compose.md_theme_dark_onError
 import com.renan.cifraeditor.R
 import com.renan.cifraeditor.domain.database.allToms
 import com.renan.cifraeditor.domain.entities.tables.Tom
 import com.renan.cifraeditor.presenter.ui.AppRoutes
 import com.renan.cifraeditor.presenter.ui.components.AppSnackBarHost
 import com.renan.cifraeditor.presenter.ui.components.CustomTopAppBar
+import com.renan.cifraeditor.presenter.ui.theme.md_theme_dark_onError
+import com.renan.cifraeditor.presenter.ui.theme.md_theme_dark_onErrorContainer
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -70,7 +73,8 @@ fun AddCipherPage(
     val snackHost = remember { SnackbarHostState() }
     val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 0)
     val uiState = addCipherViewModel.state.collectAsStateWithLifecycle()
-    var isError by rememberSaveable { mutableStateOf(false) }
+    var isErrorNameMusic by rememberSaveable { mutableStateOf(false) }
+    var isErrorLetterMusic by rememberSaveable { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(key1 = uiState.value.errorMessage, key2 = uiState.value.idCipherCreated) {
         if (uiState.value.errorMessage?.isNotEmpty() == true) {
@@ -91,76 +95,86 @@ fun AddCipherPage(
     }
 
     Scaffold(snackbarHost = { AppSnackBarHost(hostState = snackHost) }, topBar = {
-        CustomTopAppBar(title = "Nova Cifra", backOnTap = {navController.popBackStack()})
+        CustomTopAppBar(title = "Nova Cifra", backOnTap = { navController.popBackStack() })
     }) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .imePadding()
-        ) {
-            HorizontalPager(
-                state = pagerState,
-                userScrollEnabled = false,
-                verticalAlignment = Alignment.Top,
-            ) { page ->
-                when (page) {
-                    0 -> AddNameCipherPage(isError = isError)
-                    1 -> AddTomPage()
-                    2 -> AddLetterPage()
-                }
+        AnimatedVisibility(visible = uiState.value.loading) {
+            Row (verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()){
+                CircularProgressIndicator()
             }
-            Spacer(
+        }
+        AnimatedVisibility(visible = !uiState.value.loading) {
+            Column(
                 modifier = Modifier
-                    .navigationBarsPadding()
-                    .weight(1f),
-            )
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
-                horizontalArrangement = Arrangement.Center
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .imePadding()
             ) {
-                repeat(3) { iteration ->
-                    val color =
-                        if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
-                    Box(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .size(10.dp)
-                    )
+                HorizontalPager(
+                    state = pagerState,
+                    userScrollEnabled = false,
+                    verticalAlignment = Alignment.Top,
+                ) { page ->
+                    when (page) {
+                        0 -> AddNameCipherPage(isError = isErrorNameMusic)
+                        1 -> AddTomPage()
+                        2 -> AddLetterPage(isError = isErrorLetterMusic)
+                    }
                 }
-            }
-            Row {
-                ElevatedButton(onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(
-                            pagerState.currentPage - 1
+                Spacer(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .weight(1f),
+                )
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(3) { iteration ->
+                        val color =
+                            if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
+                        Box(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                                .size(10.dp)
                         )
                     }
-                }) {
-                    Text(text = "Voltar")
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                if (pagerState.currentPage == 2) {
+                Row {
                     ElevatedButton(onClick = {
-                        coroutineScope.launch { addCipherViewModel.saveCipher() }
-                    }, content = { Text(text = "Salvar") })
-                } else {
-                    ElevatedButton(onClick = {
-                        isError = addCipherViewModel.validateNameMusic()
                         coroutineScope.launch {
-                            if (!isError) pagerState.animateScrollToPage(
-                                pagerState.currentPage + 1
+                            pagerState.animateScrollToPage(
+                                pagerState.currentPage - 1
                             )
                         }
-                    }, content = { Text(text = "Avançar") })
+                    }) {
+                        Text(text = "Voltar")
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    if (pagerState.currentPage == 2) {
+                        ElevatedButton(onClick = {
+                            coroutineScope.launch { addCipherViewModel.saveCipher() }
+                        }, content = { Text(text = "Salvar") })
+                    } else {
+                        ElevatedButton(onClick = {
+                            isErrorNameMusic = addCipherViewModel.validateNameMusic()
+                            isErrorLetterMusic = addCipherViewModel.validateLetterMusic()
+                            coroutineScope.launch {
+                                if (!isErrorNameMusic) pagerState.animateScrollToPage(
+                                    pagerState.currentPage + 1
+                                )
+                            }
+                        }, content = { Text(text = "Avançar") })
+                    }
                 }
-            }
 
+            }
         }
     }
 }
@@ -174,7 +188,7 @@ fun AddNameCipherPage(isError: Boolean) {
     Column(
     ) {
         OutlinedTextField(
-            label = { Text(if (isError) "Nome da Música *" else "Nome da Música") },
+            label = { Text("Nome da Música") },
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_music_note_24),
@@ -257,7 +271,7 @@ fun AddTomPage() {
 }
 
 @Composable
-fun AddLetterPage() {
+fun AddLetterPage(isError: Boolean) {
     val localConfiguration = LocalConfiguration.current
     var letterMusic by remember { mutableStateOf("") }
     val addCipherViewModel = hiltViewModel<AddCipherViewModel>()
@@ -272,6 +286,13 @@ fun AddLetterPage() {
                 addCipherViewModel.setLetterMusic(letterMusic)
             },
             label = { Text("Letra da Música") },
+            supportingText = {
+                if (isError) Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = md_theme_dark_onErrorContainer,
+                    text = "A letra da música é obrigatório",
+                )
+            },
         )
     }
 }

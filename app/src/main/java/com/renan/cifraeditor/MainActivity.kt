@@ -22,8 +22,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.compose.CifraEditorTheme
 import com.renan.cifraeditor.presenter.ui.AppNavigationHost
+import com.renan.cifraeditor.presenter.ui.theme.CifraEditorTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -38,10 +38,8 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    Scaffold {  paddingValues ->
-                        AppNavigationHost(
-                            navController = navController)
-                    }
+                    AppNavigationHost(
+                        navController = navController)
                 }
             }
         }
