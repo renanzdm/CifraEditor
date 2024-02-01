@@ -22,7 +22,7 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
     var state = _state.asStateFlow()
 
     fun validateNameMusic(): Boolean {
-        return _state.value.nameMusic?.isEmpty() ?: false
+        return _state.value.nameMusic?.isEmpty() ?: true
     }
 
     fun setNameMusic(name: String) {
