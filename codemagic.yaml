@@ -1,6 +1,14 @@
 workflows:
+
   build_and_publish:
     name: Build and Publish
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
     environment:
       android_signing:
         - cifraeditorkeys
@@ -9,7 +17,8 @@ workflows:
       - echo "Building the app"
       - ./gradlew build
       - echo "Publishing the app"
-      - ./gradlew bundleRelease # ou ./gradlew assembleRelease, dependendo da sua configuração
+      - ./gradlew bundleRelease
     artifacts:
       - build/app/outputs/bundle/release/app-release.aab
+
 
