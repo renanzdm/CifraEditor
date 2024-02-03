@@ -8,5 +8,6 @@ import androidx.room.PrimaryKey
 data class Word(
     @PrimaryKey val wordId: Long? = null,
     @ColumnInfo var wordName: String,
-    @ColumnInfo val fkChiper: Long
+    @ColumnInfo val fkChiper: Long,
+    @ColumnInfo val order : Int
 )

@@ -3,6 +3,7 @@ package com.renan.cifraeditor.presenter.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -23,7 +24,7 @@ import com.renan.cifraeditor.presenter.ui.theme.md_theme_dark_outlineVariant
 fun ModalConfirmButton(
     setShowDialog: (Boolean) -> Unit,
     text: String,
-    buttons: List<@Composable () -> Unit>
+    buttons: List<@Composable (RowScope) -> Unit>
 ) {
     BasicAlertDialog(onDismissRequest = { setShowDialog(false) }) {
         Surface(
@@ -37,7 +38,7 @@ fun ModalConfirmButton(
                 Text(text = text)
                 Spacer(modifier = Modifier.height(12.dp))
                 Row {
-                    buttons.forEach { it.invoke() }
+                    buttons.forEach { it.invoke(this) }
                 }
             }
 

@@ -1,9 +1,11 @@
 package com.renan.cifraeditor.presenter.cipherdetails
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,11 +27,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
@@ -36,6 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +49,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -52,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,6 +69,7 @@ import com.renan.cifraeditor.domain.entities.tables.Chord
 import com.renan.cifraeditor.domain.entities.tables.Tom
 import com.renan.cifraeditor.presenter.ui.components.CustomTopAppBar
 import com.renan.cifraeditor.presenter.ui.components.ModalConfirmButton
+import com.renan.cifraeditor.presenter.ui.theme.md_theme_dark_onSecondary
 import com.renan.cifraeditor.presenter.ui.theme.md_theme_dark_outlineVariant
 import kotlinx.coroutines.launch
 
@@ -76,6 +84,9 @@ fun CipherDetailsPage(
 ) {
     val uiState = cipherDetailsViewModel.state.collectAsStateWithLifecycle()
     var showPopUpButton by remember { mutableStateOf(false) }
+    var showModalConfirmDelete by remember { mutableStateOf(false) }
+    var showModalConfirmEdit by remember { mutableStateOf(false) }
+    var showModalEditLetter by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     LifecycleStartEffect(lifecycleOwner = LocalLifecycleOwner.current) {
         if (idCipher != null) {
@@ -85,37 +96,81 @@ fun CipherDetailsPage(
     }
 
 
-    if (showPopUpButton) {
-        ModalConfirmButton(setShowDialog = {  showPopUpButton = it },
-            text = "Excluir Cifra?",
+    if (showModalConfirmDelete) {
+        ModalConfirmButton(setShowDialog = { showModalConfirmDelete = false },
+            text = "Deseja excluir?",
             buttons = listOf {
-                Button(
-                    onClick = {
-                        showPopUpButton = false
-                        cipherDetailsViewModel.deleteCipher()
-                        navController.popBackStack()
-                    }) {
+                Button(onClick = {
+                    showPopUpButton = false
+                    cipherDetailsViewModel.deleteCipher()
+                    navController.popBackStack()
+                }) {
                     Text(text = "Sim")
                 }
-                Spacer(modifier = Modifier.width(12.dp))
-                ElevatedButton(onClick = { showPopUpButton = false }) {
+                Spacer(modifier = Modifier.width(20.dp))
+                Button(onClick = { showModalConfirmDelete = false }) {
                     Text(text = "Não")
                 }
-            }
+            })
+    }
 
-        )
+    if (showModalConfirmEdit) {
+        ModalConfirmButton(setShowDialog = { showModalConfirmEdit = false },
+            text = "Ao editar a letra da música todos os acordes serão perdidos, tem certeza ?",
+            buttons = listOf {
+                Button(onClick = {
+                    showModalEditLetter = true
+                }) {
+                    Text(text = "Sim")
+                }
+                Spacer(modifier = Modifier.width(20.dp))
+                Button(onClick = { showModalConfirmEdit = false }) {
+                    Text(text = "Não")
+                }
+            })
+    }
 
+    if (showModalEditLetter) {
+        DialogEditLetter(onDimiss = { showModalEditLetter = false })
     }
 
 
+    if (showPopUpButton) {
+        Popup(
+            onDismissRequest = { showPopUpButton = false }, alignment = Alignment.TopEnd
+        ) {
+            Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 40.dp)) {
+                Column(
+                    modifier = Modifier
+                        .clip(
+                            RoundedCornerShape(10)
+                        )
+                        .background(color = md_theme_dark_onSecondary)
+                ) {
+                    TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        onClick = {
+                            showModalConfirmDelete = true
+                        }) {
+                        Text(text = "Excluir")
+                    }
+                    TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        onClick = {
+                            showModalConfirmEdit = true
+                        }) {
+                        Text(text = "Editar Letra")
+                    }
+                }
+            }
+        }
 
+    }
 
     Scaffold(topBar = {
         CustomTopAppBar(backOnTap = { navController.popBackStack() }, actions = {
             IconButton(onClick = {
                 showPopUpButton = true
             }) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete")
+                Icon(imageVector = Icons.Default.MoreVert, contentDescription = "options")
             }
         })
     }) { pdv ->
@@ -166,8 +221,7 @@ fun CipherDetailsPage(
                         )
                     }
 
-                    ExposedDropdownMenu(
-                        expanded = expanded,
+                    ExposedDropdownMenu(expanded = expanded,
                         onDismissRequest = { expanded = false }) {
                         uiState.value.listToms.forEach { item ->
                             DropdownMenuItem(text = { Text(text = item.tomName) }, onClick = {
@@ -199,9 +253,6 @@ fun CipherDetailsPage(
                                         selectValue = { chordSelected ->
                                             cipherDetailsViewModel.insertWordChordCrossReference(
                                                 word = wordWithChords.word, chord = chordSelected
-                                            )
-                                            cipherDetailsViewModel.getCipherById(
-                                                cipherDetailsViewModel.state.value.cipher!!.cipherId!!
                                             )
                                         })
                                 }
@@ -478,4 +529,39 @@ fun DialogRemoveChord(
         }
 
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DialogEditLetter(onDimiss: () -> Unit) {
+    val cipherDetailsViewModel = hiltViewModel<CipherDetailsViewModel>()
+    var letterMusic by remember { mutableStateOf(cipherDetailsViewModel.joinWordsToString()) }
+
+    BasicAlertDialog(onDismissRequest = onDimiss) {
+        Surface(
+            modifier = Modifier.padding(8.dp),
+            shape = RoundedCornerShape(8),
+            shadowElevation = 12.dp,
+            color = md_theme_dark_outlineVariant
+        ) {
+            Column(
+                modifier = Modifier
+                    .imePadding()
+            ) {
+                TextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    value = letterMusic,
+                    onValueChange = {
+                        letterMusic = it
+                    },
+                    label = { Text("Letra da Música") },
+                )
+            }
+
+
+        }
+    }
+
+
 }

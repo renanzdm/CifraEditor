@@ -97,7 +97,8 @@ class LocalRepositoryImpl @Inject constructor(
     override suspend fun getCipherById(id: Long): Resource<CipherWithWordsAndChords> {
         return withContext(Dispatchers.IO) {
             try {
-                val cipher: CipherWithWordsAndChords = cipherDao.getById(id)
+                var cipher: CipherWithWordsAndChords = cipherDao.getById(id)
+                cipher = cipher.copy(wordWithChords =  cipher.wordWithChords.sortedBy { it.word.order })
                 return@withContext Resource.Success(cipher)
             } catch (ex: Exception) {
                 return@withContext Resource.Error(ex.message ?: "")

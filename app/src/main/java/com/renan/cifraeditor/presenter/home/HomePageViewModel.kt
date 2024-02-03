@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -60,9 +61,10 @@ class HomePageViewModel @Inject constructor(private val localRepository: LocalRe
         if (text.isNotEmpty()) {
             _state.update { state ->
                 state.copy(ciphers = listSearched.filter {
-                    it.cipherName.contains(text) || it.cipherArtist?.contains(
-                        text
-                    ) == true
+                    it.cipherName.lowercase(Locale.getDefault())
+                        .contains(text.lowercase(Locale.getDefault())) || it.cipherArtist?.lowercase(
+                        Locale.getDefault()
+                    )?.contains(text.lowercase(Locale.getDefault())) == true
                 })
             }
         } else {

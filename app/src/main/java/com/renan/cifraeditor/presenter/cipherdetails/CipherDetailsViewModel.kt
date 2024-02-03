@@ -92,11 +92,16 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
                     loading = true,
                 )
             }
-            localRepositoryImpl.insertWordChordCrossReference(
-                entity = WordChordCrossReference(
-                    chordId = chord.chordId, wordId = word.wordId
+            viewModelScope.async {
+                localRepositoryImpl.insertWordChordCrossReference(
+                    entity = WordChordCrossReference(
+                        chordId = chord.chordId, wordId = word.wordId
+                    )
                 )
-            )
+            }.await()
+            viewModelScope.async {
+                getCipherById(_state.value.cipher!!.cipherId!!)
+            }.await()
             _state.update {
                 it.copy(
                     loading = false,
@@ -176,19 +181,17 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
                             chord = chord,
                             interval = newTom.interval - _state.value.tomOfCipher!!.interval
                         )
-//                        println(tomTransposedName)
-//                        println(chord)
 
-                        val newChordTransposed = chordsNewTom.data.first {
-                            it.tonic.equals(tomTransposedName,ignoreCase = true) && it.chordDegree == chord.chordDegree && it.major == chord.major
+                        val newChordTransposed = chordsNewTom.data.firstOrNull {
+                            it.tonic.equals(
+                                tomTransposedName, ignoreCase = true
+                            ) && it.chordDegree == chord.chordDegree && it.major == chord.major
                         }
-//                        println(newChordTransposed)
-
 
                         viewModelScope.async {
                             localRepositoryImpl.insertWordChordCrossReference(
                                 entity = WordChordCrossReference(
-                                    chordId = newChordTransposed.chordId,
+                                    chordId = newChordTransposed?.chordId ?: chord.chordId,
                                     wordId = wordWithChords.word.wordId
                                 )
                             )
@@ -216,7 +219,6 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
         val notes = allToms.filter { tom -> tom.major }.map { it.tonic }
         val indexNote: Int = notes.indexOf(chord.tonic)
         val transposedIndex = (indexNote + interval).mod(notes.size)
-//        return notes[transposedIndex] + chord.chordName.substring(startIndex = 1)
         return notes[transposedIndex]
     }
 
@@ -230,6 +232,37 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
 
 
     fun deleteCipher() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    loading = true,
+                )
+            }
+            localRepositoryImpl.deleteCipher(
+                cipher = _state.value.cipher!!, words = _state.value.wordsWithChords
+            )
+            _state.update {
+                it.copy(
+                    loading = false,
+                )
+            }
+
+
+        }
+    }
+
+
+    fun joinWordsToString():String{
+        _state.value
+        return  _state.value.wordsWithChords.joinToString(
+            transform = {it.word.wordName},
+            separator = " "
+        )
+    }
+
+
+
+    fun editCipher() {
         viewModelScope.launch {
             _state.update {
                 it.copy(

@@ -78,14 +78,14 @@ fun CifraEditorTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit
 ) {
-    val colors = if (useDarkTheme) {
-        LightColors
-    } else {
-        DarkColors
-    }
+//    val colors = if (useDarkTheme) {
+//        LightColors
+//    } else {
+//        DarkColors
+//    }
 
     MaterialTheme(
-        colorScheme = colors,
+        colorScheme = DarkColors,
         content = content
     )
 }
