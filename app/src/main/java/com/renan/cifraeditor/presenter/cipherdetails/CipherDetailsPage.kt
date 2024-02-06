@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,7 +39,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +65,7 @@ import com.renan.cifraeditor.domain.database.allToms
 import com.renan.cifraeditor.domain.entities.entitiesrelations.WordWithChords
 import com.renan.cifraeditor.domain.entities.tables.Chord
 import com.renan.cifraeditor.domain.entities.tables.Tom
+import com.renan.cifraeditor.presenter.ui.AppRoutes
 import com.renan.cifraeditor.presenter.ui.components.CustomTopAppBar
 import com.renan.cifraeditor.presenter.ui.components.ModalConfirmButton
 import com.renan.cifraeditor.presenter.ui.theme.md_theme_dark_onSecondary
@@ -78,7 +77,7 @@ import kotlinx.coroutines.launch
 @Composable
 
 fun CipherDetailsPage(
-    cipherDetailsViewModel: CipherDetailsViewModel = hiltViewModel(),
+    cipherDetailsViewModel: CipherDetailsViewModel,
     idCipher: Long?,
     navController: NavController
 ) {
@@ -86,7 +85,6 @@ fun CipherDetailsPage(
     var showPopUpButton by remember { mutableStateOf(false) }
     var showModalConfirmDelete by remember { mutableStateOf(false) }
     var showModalConfirmEdit by remember { mutableStateOf(false) }
-    var showModalEditLetter by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     LifecycleStartEffect(lifecycleOwner = LocalLifecycleOwner.current) {
         if (idCipher != null) {
@@ -116,10 +114,11 @@ fun CipherDetailsPage(
 
     if (showModalConfirmEdit) {
         ModalConfirmButton(setShowDialog = { showModalConfirmEdit = false },
-            text = "Ao editar a letra da música todos os acordes serão perdidos, tem certeza ?",
+            text = "Deseja editar a letra?",
             buttons = listOf {
                 Button(onClick = {
-                    showModalEditLetter = true
+                    showModalConfirmEdit = false
+                    navController.navigate(AppRoutes.editLetterPage)
                 }) {
                     Text(text = "Sim")
                 }
@@ -129,11 +128,6 @@ fun CipherDetailsPage(
                 }
             })
     }
-
-    if (showModalEditLetter) {
-        DialogEditLetter(onDimiss = { showModalEditLetter = false })
-    }
-
 
     if (showPopUpButton) {
         Popup(
@@ -221,7 +215,8 @@ fun CipherDetailsPage(
                         )
                     }
 
-                    ExposedDropdownMenu(expanded = expanded,
+                    ExposedDropdownMenu(
+                        expanded = expanded,
                         onDismissRequest = { expanded = false }) {
                         uiState.value.listToms.forEach { item ->
                             DropdownMenuItem(text = { Text(text = item.tomName) }, onClick = {
@@ -293,23 +288,29 @@ fun WordCard(
     Column(verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .height(40.dp)
             .pointerInput(Unit) {
                 detectTapGestures(onLongPress = { _ ->
                     if (!entity.chords.isNullOrEmpty()) showDialogRemoveChord.value = true
                 }, onTap = { _ -> showDialogAddChord.value = true })
             }) {
-        if (entity.chords != null) {
+        if (!entity.chords.isNullOrEmpty()) {
             LazyRow {
-                items(items = entity.chords) {
+                items(
+                    key = { item -> item.hashCode() },
+                    items = entity.chords
+                ) {
                     Text(
-                        modifier = Modifier.padding(horizontal = 2.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 2.dp)
+                            .height(14.dp),
                         text = it.chordName,
                         textAlign = TextAlign.Center,
                         style = TextStyle(color = Color.Yellow, fontSize = 12.sp),
                     )
                 }
             }
+        } else {
+            Spacer(modifier = Modifier.height(14.dp))
         }
         Text(
             text = entity.word.wordName,
@@ -531,37 +532,3 @@ fun DialogRemoveChord(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DialogEditLetter(onDimiss: () -> Unit) {
-    val cipherDetailsViewModel = hiltViewModel<CipherDetailsViewModel>()
-    var letterMusic by remember { mutableStateOf(cipherDetailsViewModel.joinWordsToString()) }
-
-    BasicAlertDialog(onDismissRequest = onDimiss) {
-        Surface(
-            modifier = Modifier.padding(8.dp),
-            shape = RoundedCornerShape(8),
-            shadowElevation = 12.dp,
-            color = md_theme_dark_outlineVariant
-        ) {
-            Column(
-                modifier = Modifier
-                    .imePadding()
-            ) {
-                TextField(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    value = letterMusic,
-                    onValueChange = {
-                        letterMusic = it
-                    },
-                    label = { Text("Letra da Música") },
-                )
-            }
-
-
-        }
-    }
-
-
-}

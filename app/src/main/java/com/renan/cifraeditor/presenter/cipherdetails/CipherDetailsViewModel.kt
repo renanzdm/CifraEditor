@@ -252,26 +252,42 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
     }
 
 
-    fun joinWordsToString():String{
-        _state.value
-        return  _state.value.wordsWithChords.joinToString(
-            transform = {it.word.wordName},
-            separator = " "
+    fun joinWordsToString(): String {
+        return _state.value.wordsWithChords.joinToString(
+            transform = { it.word.wordName }, separator = " "
         )
     }
 
 
-
-    fun editCipher() {
+    fun editCipher(words: String) {
+        val anySpacesRemoved = words.trimIndent().replace(Regex("\\s+"), " ")
+        val listWords: List<String> = anySpacesRemoved.split(" ")
         viewModelScope.launch {
             _state.update {
                 it.copy(
                     loading = true,
                 )
             }
-            localRepositoryImpl.deleteCipher(
-                cipher = _state.value.cipher!!, words = _state.value.wordsWithChords
-            )
+            val newWordsCipher = mutableListOf<Word>()
+            for (index in listWords.indices) {
+                val targetWord: WordWithChords? =
+                    _state.value.wordsWithChords.firstOrNull { w -> w.word.wordName == listWords[index] && w.word.order == index}
+                newWordsCipher.add(
+                    targetWord?.word ?: Word(
+                        wordName = listWords[index],
+                        fkChiper = _state.value.cipher!!.cipherId!!,
+                        order = index
+                    )
+                )
+            }
+            for (newWords in newWordsCipher) {
+                localRepositoryImpl.upsertWord(newWords)
+            }
+
+            viewModelScope.async {
+                getCipherById(id = _state.value.cipher!!.cipherId!!)
+            }.await()
+
             _state.update {
                 it.copy(
                     loading = false,

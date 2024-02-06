@@ -98,7 +98,8 @@ class LocalRepositoryImpl @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 var cipher: CipherWithWordsAndChords = cipherDao.getById(id)
-                cipher = cipher.copy(wordWithChords =  cipher.wordWithChords.sortedBy { it.word.order })
+                cipher =
+                    cipher.copy(wordWithChords = cipher.wordWithChords.sortedBy { it.word.order })
                 return@withContext Resource.Success(cipher)
             } catch (ex: Exception) {
                 return@withContext Resource.Error(ex.message ?: "")
@@ -166,8 +167,7 @@ class LocalRepositoryImpl @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 wordChordCrossReferenceDao.delete(
-                    chordId = entity.chordId!!,
-                    wordId = entity.wordId!!
+                    chordId = entity.chordId!!, wordId = entity.wordId!!
                 )
                 return@withContext Resource.Success(data = "Sucesso")
             } catch (ex: Exception) {
@@ -199,8 +199,7 @@ class LocalRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteCipher(
-        cipher: Cipher,
-        words: List<WordWithChords>
+        cipher: Cipher, words: List<WordWithChords>
     ): Resource<String> {
         return withContext(Dispatchers.IO) {
             try {
@@ -219,6 +218,21 @@ class LocalRepositoryImpl @Inject constructor(
             try {
                 wordChordCrossReferenceDao.deleteByWordIds(words.map { it.word.wordId!! })
                 return@withContext Resource.Success(data = "Cifra Excluida")
+            } catch (ex: Exception) {
+                return@withContext Resource.Error(message = ex.message ?: "")
+            }
+        }
+    }
+
+    override suspend fun upsertWord(word: Word): Resource<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                if (word.wordId != null) {
+                    wordDao.updateWord(word)
+                } else {
+                    wordDao.insert(word)
+                }
+                return@withContext Resource.Success(data = "Letra Editada com Sucesso")
             } catch (ex: Exception) {
                 return@withContext Resource.Error(message = ex.message ?: "")
             }

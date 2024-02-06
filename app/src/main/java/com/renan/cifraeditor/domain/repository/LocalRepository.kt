@@ -27,5 +27,7 @@ interface LocalRepository {
     suspend fun deleteCipher(cipher:Cipher,words: List<WordWithChords>): Resource<String>
     suspend fun deleteAllChordsByWords(words: List<WordWithChords>): Resource<String>
 
+    suspend fun upsertWord(word: Word):Resource<String>
+
 
 }

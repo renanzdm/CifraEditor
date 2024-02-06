@@ -6,7 +6,7 @@ workflows:
       events:
         - push
       branch_patterns:
-        - pattern: 'main'
+        - pattern: 'alpha'
           include: true
           source: true
     environment:
@@ -25,4 +25,4 @@ workflows:
     publishing:
       google_play:
         credentials: $gcp_key
-        track: internal
+        track: beta
