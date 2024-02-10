@@ -13,5 +13,6 @@ data class CipherDetailsState(
     var wordsWithChords: List<WordWithChords> = emptyList(),
     var chords: List<Chord> = emptyList(),
     var listToms: List<Tom> = emptyList(),
-    var tomOfCipher: Tom? = null
+    var tomOfCipher: Tom? = null,
+    var fontSize:Int=12
 )

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,6 +41,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +64,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.renan.cifraeditor.R
 import com.renan.cifraeditor.domain.database.allToms
 import com.renan.cifraeditor.domain.entities.entitiesrelations.WordWithChords
 import com.renan.cifraeditor.domain.entities.tables.Chord
@@ -77,9 +81,7 @@ import kotlinx.coroutines.launch
 @Composable
 
 fun CipherDetailsPage(
-    cipherDetailsViewModel: CipherDetailsViewModel,
-    idCipher: Long?,
-    navController: NavController
+    cipherDetailsViewModel: CipherDetailsViewModel, idCipher: Long?, navController: NavController
 ) {
     val uiState = cipherDetailsViewModel.state.collectAsStateWithLifecycle()
     var showPopUpButton by remember { mutableStateOf(false) }
@@ -184,7 +186,6 @@ fun CipherDetailsPage(
                     CircularProgressIndicator()
                 }
             } else {
-
                 Text(
                     text = uiState.value.cipher?.cipherName ?: "", style = TextStyle(
                         color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold
@@ -194,38 +195,51 @@ fun CipherDetailsPage(
                     text = uiState.value.cipher?.cipherArtist ?: "",
                     style = TextStyle(color = Color.White)
                 )
+
                 Spacer(modifier = Modifier.height(20.dp))
-                ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {
-                    expanded = !expanded
-                }) {
-                    Row(
-                        modifier = Modifier
-                            .width(80.dp)
-                            .menuAnchor()
-                    ) {
-                        Text(
-                            uiState.value.tomOfCipher?.tomName ?: "",
-                        )
-                        Spacer(modifier = Modifier.width(20.dp))
+                Row {
+                    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {
+                        expanded = !expanded
+                    }) {
+                        Row(
+                            modifier = Modifier
+                                .width(80.dp)
+                                .menuAnchor()
+                        ) {
+                            Text(
+                                uiState.value.tomOfCipher?.tomName ?: "",
+                                style = TextStyle(fontSize = 20.sp)
+                            )
+                            Spacer(modifier = Modifier.width(20.dp))
 
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "",
-                            tint = Color.White
-                        )
-                    }
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "",
+                                tint = Color.White
+                            )
+                        }
 
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }) {
-                        uiState.value.listToms.forEach { item ->
-                            DropdownMenuItem(text = { Text(text = item.tomName) }, onClick = {
-                                expanded = false
-                                cipherDetailsViewModel.selectNewTom(item)
-                            })
+                        ExposedDropdownMenu(expanded = expanded,
+                            onDismissRequest = { expanded = false }) {
+                            uiState.value.listToms.forEach { item ->
+                                DropdownMenuItem(text = { Text(text = item.tomName) }, onClick = {
+                                    expanded = false
+                                    cipherDetailsViewModel.selectNewTom(item)
+                                })
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Icon(imageVector = Icons.Outlined.Add,
+                        contentDescription = "",
+                        modifier = Modifier.clickable {cipherDetailsViewModel.increaseFont() })
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Icon(painter = painterResource(id = R.drawable.baseline_remove_24),
+                        contentDescription = "",
+                        modifier = Modifier.clickable {cipherDetailsViewModel.decreaseFont() })
                 }
+
                 Spacer(modifier = Modifier.height(20.dp))
                 AnimatedVisibility(visible = uiState.value.wordsFormatted.isNotEmpty()) {
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
@@ -234,7 +248,8 @@ fun CipherDetailsPage(
                         }) { items ->
                             FlowRow {
                                 items.map { wordWithChords ->
-                                    WordCard(entity = wordWithChords,
+                                    WordCard(uiState = uiState,
+                                        entity = wordWithChords,
                                         chords = uiState.value.chords,
                                         deleteChord = { chordSelected ->
                                             cipherDetailsViewModel.deleteWordChordCrossReference(
@@ -267,7 +282,9 @@ fun WordCard(
     entity: WordWithChords,
     chords: List<Chord>,
     selectValue: (Chord) -> Unit,
-    deleteChord: (Chord) -> Unit
+    deleteChord: (Chord) -> Unit,
+    uiState: State<CipherDetailsState>
+
 ) {
     val showDialogAddChord = remember { mutableStateOf(false) }
     val showDialogRemoveChord = remember { mutableStateOf(false) }
@@ -287,35 +304,42 @@ fun WordCard(
     }
     Column(verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .pointerInput(Unit) {
-                detectTapGestures(onLongPress = { _ ->
-                    if (!entity.chords.isNullOrEmpty()) showDialogRemoveChord.value = true
-                }, onTap = { _ -> showDialogAddChord.value = true })
-            }) {
-        if (!entity.chords.isNullOrEmpty()) {
-            LazyRow {
+        modifier = Modifier.pointerInput(Unit) {
+            detectTapGestures(onLongPress = { _ ->
+                if (!entity.chords.isNullOrEmpty()) showDialogRemoveChord.value = true
+            }, onTap = { _ -> showDialogAddChord.value = true })
+        }) {
+
+        LazyRow {
+            item {
+                Text(
+                    modifier = Modifier.padding(horizontal = 2.dp),
+                    text = "",
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(color = Color.Yellow, fontSize = uiState.value.fontSize.sp),
+                )
+            }
+
+            if (!entity.chords.isNullOrEmpty()) {
                 items(
-                    key = { item -> item.hashCode() },
-                    items = entity.chords
+                    key = { item -> item.hashCode() }, items = entity.chords
                 ) {
                     Text(
-                        modifier = Modifier
-                            .padding(horizontal = 2.dp)
-                            .height(14.dp),
+                        modifier = Modifier.padding(horizontal = 2.dp),
                         text = it.chordName,
                         textAlign = TextAlign.Center,
-                        style = TextStyle(color = Color.Yellow, fontSize = 12.sp),
+                        style = TextStyle(
+                            color = Color.Yellow, fontSize = uiState.value.fontSize.sp
+                        ),
                     )
                 }
             }
-        } else {
-            Spacer(modifier = Modifier.height(14.dp))
         }
+
         Text(
-            text = entity.word.wordName,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 1.dp)
+            text = entity.word.wordName, textAlign = TextAlign.Center, style = TextStyle(
+                fontSize = uiState.value.fontSize.sp
+            ), modifier = Modifier.padding(horizontal = 1.dp)
         )
     }
 }

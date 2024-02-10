@@ -63,80 +63,87 @@ fun HomePage(homeViewModel: HomePageViewModel = hiltViewModel(), navController: 
             Icon(imageVector = Icons.Rounded.Add, contentDescription = "Adicionar")
         }
     }) {
-        Column(
-            modifier = Modifier
-                .padding(it)
-                .fillMaxSize(),
-        ) {
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                AnimatedVisibility(visible = isSearch) {
-                    OutlinedTextField(trailingIcon = {
-                        IconButton(onClick = {
-                            isSearch = false
-                            searchValue = ""
-                            homeViewModel.searchCipher(searchValue)
-                        }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Close,
-                                contentDescription = "fechar busca",
-                                modifier = Modifier
-                                    .height(30.dp)
-                                    .width(30.dp)
-                            )
-                        }
-                    }, label = {
-                        Text(
-                            "Nome da música, ou artista",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Light
-                        )
-                    }, value = searchValue, onValueChange = { value ->
-                        searchValue = value
-                        homeViewModel.searchCipher(searchValue)
-
-                    }, modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = { isSearch = true }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = "buscar cifras",
-                        modifier = Modifier
-                            .height(30.dp)
-                            .width(30.dp)
-                    )
-                }
+        AnimatedVisibility(visible = uiState.value.loading, content = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                CircularProgressIndicator()
             }
+        })
 
-            Text(
-                text = "Cifras",
-                style = TextStyle(),
-                fontSize = 48.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(16.dp)
-            )
+        AnimatedVisibility(visible = !uiState.value.loading) {
 
-            Spacer(modifier = Modifier.height(20.dp))
-            AnimatedVisibility(visible = uiState.value.ciphers.isEmpty(), content = {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = "Nenhuma cifra encontrada...",
-                    fontSize = 16.sp,
-                    style = TextStyle(fontWeight = FontWeight.Light)
-                )
-            })
-            AnimatedVisibility(visible = uiState.value.loading, content = {
-                Row(horizontalArrangement = Arrangement.Center) {
-                    CircularProgressIndicator()
+            Column(
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize(),
+            ) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AnimatedVisibility(visible = isSearch) {
+                        OutlinedTextField(trailingIcon = {
+                            IconButton(onClick = {
+                                isSearch = false
+                                searchValue = ""
+                                homeViewModel.searchCipher(searchValue)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Close,
+                                    contentDescription = "fechar busca",
+                                    modifier = Modifier
+                                        .height(30.dp)
+                                        .width(30.dp)
+                                )
+                            }
+                        }, label = {
+                            Text(
+                                "Nome da música, ou artista",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Light
+                            )
+                        }, value = searchValue, onValueChange = { value ->
+                            searchValue = value
+                            homeViewModel.searchCipher(searchValue)
+
+                        }, modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
+
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(onClick = { isSearch = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Search,
+                            contentDescription = "buscar cifras",
+                            modifier = Modifier
+                                .height(30.dp)
+                                .width(30.dp)
+                        )
+                    }
                 }
-            })
-            AnimatedVisibility(visible = !uiState.value.loading) {
+
+                Text(
+                    text = "Cifras",
+                    style = TextStyle(),
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+                AnimatedVisibility(visible = uiState.value.ciphers.isEmpty(), content = {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = "Nenhuma cifra encontrada...",
+                        fontSize = 16.sp,
+                        style = TextStyle(fontWeight = FontWeight.Light)
+                    )
+                })
+
                 LazyColumn {
                     items(items = uiState.value.ciphers) { item ->
                         Row(modifier = Modifier
@@ -149,7 +156,12 @@ fun HomePage(homeViewModel: HomePageViewModel = hiltViewModel(), navController: 
                                 )
                                 navController.navigate(route)
                             }, content = {
-                            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
+                            Column(
+                                modifier = Modifier.padding(
+                                    horizontal = 20.dp,
+                                    vertical = 12.dp
+                                )
+                            ) {
                                 Text(
                                     text = item.cipherName, style = TextStyle(
                                         fontWeight = FontWeight.ExtraBold, fontSize = 22.sp
@@ -169,9 +181,9 @@ fun HomePage(homeViewModel: HomePageViewModel = hiltViewModel(), navController: 
                         )
                     }
                 }
+
             }
         }
-
     }
 
 
