@@ -297,20 +297,12 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
 
         }
     }
-    fun increaseFont(){
-        val currentSize = _state.value.fontSize
+    fun updateFontSize(size:Int){
         _state.update {
-            it.copy(fontSize = currentSize.plus(1))
+            it.copy(fontSize =size)
         }
 
     }
 
-    fun decreaseFont(){
-        val currentSize = _state.value.fontSize
-
-        _state.update {
-            it.copy(fontSize =currentSize.minus(1))
-        }
-    }
 
 }

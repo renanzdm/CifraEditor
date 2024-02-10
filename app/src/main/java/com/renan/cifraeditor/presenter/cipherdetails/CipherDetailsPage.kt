@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +44,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -79,12 +81,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-
 fun CipherDetailsPage(
     cipherDetailsViewModel: CipherDetailsViewModel, idCipher: Long?, navController: NavController
 ) {
     val uiState = cipherDetailsViewModel.state.collectAsStateWithLifecycle()
     var showPopUpButton by remember { mutableStateOf(false) }
+    var showModalOptions by remember { mutableStateOf(false) }
     var showModalConfirmDelete by remember { mutableStateOf(false) }
     var showModalConfirmEdit by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
@@ -138,9 +140,7 @@ fun CipherDetailsPage(
             Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 40.dp)) {
                 Column(
                     modifier = Modifier
-                        .clip(
-                            RoundedCornerShape(10)
-                        )
+                        .clip(RoundedCornerShape(10))
                         .background(color = md_theme_dark_onSecondary)
                 ) {
                     TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -155,9 +155,23 @@ fun CipherDetailsPage(
                         }) {
                         Text(text = "Editar Letra")
                     }
+
+                    TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        onClick = {
+                            showModalOptions = true
+                        }) {
+                        Text(text = "Opções")
+                    }
                 }
             }
         }
+    }
+
+    if (showModalOptions) {
+        DialogOptions(setShowDialog = { fontSize ->
+            cipherDetailsViewModel.updateFontSize(fontSize)
+            showModalOptions = false
+        })
 
     }
 
@@ -177,7 +191,6 @@ fun CipherDetailsPage(
         ) {
 
             if (uiState.value.loading) {
-
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -185,7 +198,8 @@ fun CipherDetailsPage(
                 ) {
                     CircularProgressIndicator()
                 }
-            } else {
+            }
+            if (!uiState.value.loading) {
                 Text(
                     text = uiState.value.cipher?.cipherName ?: "", style = TextStyle(
                         color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold
@@ -195,50 +209,41 @@ fun CipherDetailsPage(
                     text = uiState.value.cipher?.cipherArtist ?: "",
                     style = TextStyle(color = Color.White)
                 )
-
                 Spacer(modifier = Modifier.height(20.dp))
-                Row {
-                    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {
-                        expanded = !expanded
-                    }) {
-                        Row(
-                            modifier = Modifier
-                                .width(80.dp)
-                                .menuAnchor()
-                        ) {
-                            Text(
-                                uiState.value.tomOfCipher?.tomName ?: "",
-                                style = TextStyle(fontSize = 20.sp)
-                            )
-                            Spacer(modifier = Modifier.width(20.dp))
+                ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = {
+                    expanded = !expanded
+                }) {
+                    Row(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .menuAnchor()
+                    ) {
+                        Text(
+                            uiState.value.tomOfCipher?.tomName ?: "",
+                            style = TextStyle(fontSize = 20.sp)
+                        )
+                        Spacer(modifier = Modifier.width(20.dp))
 
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = "",
-                                tint = Color.White
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+                    }
 
-                        ExposedDropdownMenu(expanded = expanded,
-                            onDismissRequest = { expanded = false }) {
-                            uiState.value.listToms.forEach { item ->
-                                DropdownMenuItem(text = { Text(text = item.tomName) }, onClick = {
-                                    expanded = false
-                                    cipherDetailsViewModel.selectNewTom(item)
-                                })
-                            }
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }) {
+                        uiState.value.listToms.forEach { item ->
+                            DropdownMenuItem(text = { Text(text = item.tomName) }, onClick = {
+                                expanded = false
+                                cipherDetailsViewModel.selectNewTom(item)
+                            })
                         }
                     }
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Icon(imageVector = Icons.Outlined.Add,
-                        contentDescription = "",
-                        modifier = Modifier.clickable {cipherDetailsViewModel.increaseFont() })
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Icon(painter = painterResource(id = R.drawable.baseline_remove_24),
-                        contentDescription = "",
-                        modifier = Modifier.clickable {cipherDetailsViewModel.decreaseFont() })
                 }
+
+
 
                 Spacer(modifier = Modifier.height(20.dp))
                 AnimatedVisibility(visible = uiState.value.wordsFormatted.isNotEmpty()) {
@@ -354,8 +359,6 @@ fun DialogAddChord(
     var listNewChords by remember { mutableStateOf<List<Chord>?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val cipherDetailsViewModel: CipherDetailsViewModel = hiltViewModel()
-
-
     BasicAlertDialog(onDismissRequest = { setShowDialog(false) }) {
         Surface(
             modifier = Modifier.padding(8.dp),
@@ -408,10 +411,8 @@ fun DialogAddChord(
 
 
                     }
-
                 } else {
                     Column {
-
                         IconButton(onClick = { otherTom = false }, content = {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -442,7 +443,8 @@ fun DialogAddChord(
                     }
                 }
 
-            } else {
+            }
+            if (!otherTom) {
                 LazyColumn(
                     modifier = Modifier.padding(8.dp),
                     verticalArrangement = Arrangement.Top,
@@ -556,3 +558,66 @@ fun DialogRemoveChord(
     }
 }
 
+@ExperimentalMaterial3Api
+@Composable
+fun DialogOptions(
+    setShowDialog: (Int) -> Unit,
+
+    ) {
+    val cipherDetailsViewModel: CipherDetailsViewModel = hiltViewModel()
+    var fontSizeCurrent by remember {
+        mutableIntStateOf(cipherDetailsViewModel.state.value.fontSize)
+    }
+    BasicAlertDialog(onDismissRequest = { setShowDialog(fontSizeCurrent) }) {
+        Surface(
+            modifier = Modifier.padding(8.dp),
+            shape = RoundedCornerShape(8),
+            shadowElevation = 12.dp,
+            color = md_theme_dark_outlineVariant
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    verticalAlignment = Alignment.Top, modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    Text(
+                        text = "Opções",
+                        style = TextStyle(fontSize = 16.sp),
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(onClick = { setShowDialog(fontSizeCurrent) }) {
+                        Icon(imageVector = Icons.Default.Close, contentDescription = "close")
+                    }
+                }
+                Column(modifier = Modifier) {
+                    Column {
+                        Row {
+                            Text(
+                                text = "Mudar tamanho da Fonte",
+                                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            Icon(imageVector = Icons.Outlined.Add,
+                                contentDescription = "",
+                                modifier = Modifier.clickable {
+                                    fontSizeCurrent = fontSizeCurrent.plus(1)
+                                })
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Icon(painter = painterResource(id = R.drawable.baseline_remove_24),
+                                contentDescription = "",
+                                modifier = Modifier.clickable {
+                                    fontSizeCurrent = fontSizeCurrent.minus(1)
+                                })
+                        }
+                        Text(
+                            text = fontSizeCurrent.toString(),
+                            style = TextStyle(fontWeight = FontWeight.ExtraLight),
+                        )
+                    }
+                }
+            }
+
+        }
+    }
+
+}
