@@ -55,8 +55,8 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
 
 
     private fun setWords(letter: String, idCipher: Long): List<Word> {
-        val anySpacesRemoved = letter.trimIndent().replace(Regex("\\s+"), " ")
-        val listWords: List<String> = anySpacesRemoved.split(" ")
+
+        val listWords: List<String> = letter.split(Regex("(?<=\\S)\\s+(?=\\S)|\\n"))
         return listWords.mapIndexed { index,word ->
             Word(wordName = word, fkChiper = idCipher, order = index)
         }
