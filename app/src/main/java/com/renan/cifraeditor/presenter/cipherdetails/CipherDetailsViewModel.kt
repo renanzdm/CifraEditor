@@ -39,7 +39,7 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
                         it.copy(
                             cipher = res.data!!.cipher,
                             wordsWithChords = res.data.wordWithChords,
-                            wordsFormatted = res.data.wordWithChords.chunked(5)
+                            wordsFormatted = chunkdList(res.data.wordWithChords)
                         )
                     }
                     getChordsByTom(idTom = _state.value.cipher!!.fkTom)
@@ -56,6 +56,20 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
                 }
             }
         }
+    }
+
+
+    fun chunkdList(values: List<WordWithChords>): List<List<WordWithChords>> {
+        val sublistas = mutableListOf<MutableList<WordWithChords>>()
+        var sublistaAtual = mutableListOf<WordWithChords>()
+        for (word in values) {
+            if (word.word.wordName.contains(Regex("(?<=\\S)\\s+(?=\\S)|\\n"))) {
+                sublistas.add(sublistaAtual)
+                sublistaAtual = mutableListOf()
+            }
+            sublistaAtual.add(word)
+        }
+        return sublistas
     }
 
     private fun getChordsByTom(idTom: Long) {
@@ -271,7 +285,7 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
             val newWordsCipher = mutableListOf<Word>()
             for (index in listWords.indices) {
                 val targetWord: WordWithChords? =
-                    _state.value.wordsWithChords.firstOrNull { w -> w.word.wordName == listWords[index] && w.word.order == index}
+                    _state.value.wordsWithChords.firstOrNull { w -> w.word.wordName == listWords[index] && w.word.order == index }
                 newWordsCipher.add(
                     targetWord?.word ?: Word(
                         wordName = listWords[index],
@@ -297,9 +311,10 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
 
         }
     }
-    fun updateFontSize(size:Int){
+
+    fun updateFontSize(size: Int) {
         _state.update {
-            it.copy(fontSize =size)
+            it.copy(fontSize = size)
         }
 
     }

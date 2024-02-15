@@ -3,10 +3,10 @@ package com.renan.cifraeditor.presenter.addciphers
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.renan.cifraeditor.data.models.Resource
 import com.renan.cifraeditor.data.repository.LocalRepositoryImpl
 import com.renan.cifraeditor.domain.entities.tables.Cipher
 import com.renan.cifraeditor.domain.entities.tables.Word
-import com.renan.cifraeditor.data.models.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -56,8 +56,9 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
 
     private fun setWords(letter: String, idCipher: Long): List<Word> {
 
-        val listWords: List<String> = letter.split(Regex("(?<=\\S)\\s+(?=\\S)|\\n"))
-        return listWords.mapIndexed { index,word ->
+        val listWords: List<String> =
+            letter.trimIndent().split(Regex("(?<=\\S)(?=\\s)|(?<=\\s)(?=\\S)|(?<=\\n)|(?=\\n)"))
+        return listWords.mapIndexed { index, word ->
             Word(wordName = word, fkChiper = idCipher, order = index)
         }
     }
