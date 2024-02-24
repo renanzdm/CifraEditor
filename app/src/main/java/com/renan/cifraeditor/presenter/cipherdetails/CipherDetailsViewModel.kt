@@ -39,7 +39,7 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
                         it.copy(
                             cipher = res.data!!.cipher,
                             wordsWithChords = res.data.wordWithChords,
-                            wordsFormatted = chunkdList(res.data.wordWithChords)
+                            wordsFormatted = chunkedList(res.data.wordWithChords)
                         )
                     }
                     getChordsByTom(idTom = _state.value.cipher!!.fkTom)
@@ -59,17 +59,12 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
     }
 
 
-    fun chunkdList(values: List<WordWithChords>): List<List<WordWithChords>> {
-        val sublistas = mutableListOf<MutableList<WordWithChords>>()
-        var sublistaAtual = mutableListOf<WordWithChords>()
-        for (word in values) {
-            if (word.word.wordName.contains(Regex("(?<=\\S)\\s+(?=\\S)|\\n"))) {
-                sublistas.add(sublistaAtual)
-                sublistaAtual = mutableListOf()
-            }
-            sublistaAtual.add(word)
-        }
-        return sublistas
+    private fun chunkedList(values: List<WordWithChords>): List<List<WordWithChords>> {
+        val listWithSublists: MutableList<List<WordWithChords>> = mutableListOf()
+        val groupedValuesByLine: Map<Int, List<WordWithChords>> =
+            values.groupBy { wordWithChords: WordWithChords -> wordWithChords.word.numberLine }
+        groupedValuesByLine.forEach { entry -> listWithSublists.add(entry.value) }
+        return listWithSublists
     }
 
     private fun getChordsByTom(idTom: Long) {
@@ -267,9 +262,14 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
 
 
     fun joinWordsToString(): String {
-        return _state.value.wordsWithChords.joinToString(
-            transform = { it.word.wordName }, separator = " "
-        )
+        var letter = ""
+        for (wordWithChords in _state.value.wordsFormatted) {
+            for (word in wordWithChords) {
+                letter += word.word.wordName + " "
+            }
+            letter += "\n"
+        }
+        return letter
     }
 
 
@@ -290,12 +290,13 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
                     targetWord?.word ?: Word(
                         wordName = listWords[index],
                         fkChiper = _state.value.cipher!!.cipherId!!,
-                        order = index
+                        order = index,
+                        numberLine = 1
                     )
                 )
             }
             for (newWords in newWordsCipher) {
-                localRepositoryImpl.upsertWord(newWords)
+                viewModelScope.async { localRepositoryImpl.upsertWord(newWords) }.await()
             }
 
             viewModelScope.async {

@@ -55,12 +55,21 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
 
 
     private fun setWords(letter: String, idCipher: Long): List<Word> {
+        ///SEPARA EM LINHAS
+        val linesLetterMusic: List<String> = letter.trim().split("\\n\\s*".toRegex())
+        val listWords = mutableListOf<Word>()
+        linesLetterMusic.mapIndexed { index, word ->
+            ///SEPARA EM CADA PALAVRA
+            val words = word.split("\\s".toRegex())
+            for (oneLetter in words) {
+                listWords.add(
+                    Word(
+                        wordName = oneLetter, fkChiper = idCipher, order = index, numberLine = index)
+                )
+            }
 
-        val listWords: List<String> =
-            letter.trimIndent().split(Regex("(?<=\\S)(?=\\s)|(?<=\\s)(?=\\S)|(?<=\\n)|(?=\\n)"))
-        return listWords.mapIndexed { index, word ->
-            Word(wordName = word, fkChiper = idCipher, order = index)
         }
+        return listWords
     }
 
     fun saveCipher() {
@@ -68,8 +77,6 @@ class AddCipherViewModel @Inject constructor(private val localRepositoryImpl: Lo
             _state.update {
                 it.copy(loading = true)
             }
-
-
             val cipher = Cipher(
                 cipherName = _state.value.nameMusic!!,
                 cipherArtist = _state.value.nameArtist,

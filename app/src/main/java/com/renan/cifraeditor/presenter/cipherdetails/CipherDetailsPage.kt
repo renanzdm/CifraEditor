@@ -149,12 +149,12 @@ fun CipherDetailsPage(
                         }) {
                         Text(text = "Excluir")
                     }
-                    TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        onClick = {
-                            showModalConfirmEdit = true
-                        }) {
-                        Text(text = "Editar Letra")
-                    }
+//                    TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+//                        onClick = {
+//                            showModalConfirmEdit = true
+//                        }) {
+//                        Text(text = "Editar Letra")
+//                    }
 
                     TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         onClick = {

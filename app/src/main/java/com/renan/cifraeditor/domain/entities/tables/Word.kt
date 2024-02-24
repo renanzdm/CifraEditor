@@ -9,5 +9,6 @@ data class Word(
     @PrimaryKey val wordId: Long? = null,
     @ColumnInfo var wordName: String,
     @ColumnInfo val fkChiper: Long,
-    @ColumnInfo val order : Int
+    @ColumnInfo val order : Int,
+    @ColumnInfo val numberLine : Int
 )
