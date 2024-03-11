@@ -273,35 +273,49 @@ class CipherDetailsViewModel @Inject constructor(private val localRepositoryImpl
     }
 
 
-    fun editCipher(words: String) {
-        val anySpacesRemoved = words.trimIndent().replace(Regex("\\s+"), " ")
-        val listWords: List<String> = anySpacesRemoved.split(" ")
+    fun editCipher(letterMusic: String) {
         viewModelScope.launch {
             _state.update {
                 it.copy(
                     loading = true,
                 )
             }
-            val newWordsCipher = mutableListOf<Word>()
-            for (index in listWords.indices) {
-                val targetWord: WordWithChords? =
-                    _state.value.wordsWithChords.firstOrNull { w -> w.word.wordName == listWords[index] && w.word.order == index }
-                newWordsCipher.add(
-                    targetWord?.word ?: Word(
-                        wordName = listWords[index],
-                        fkChiper = _state.value.cipher!!.cipherId!!,
-                        order = index,
-                        numberLine = 1
+            ///SEPARA EM LINHAS
+            val linesLetterMusic: List<String> = letterMusic.trim().split("\\n\\s*".toRegex())
+            val listWordsOld = mutableListOf<Word>()
+            val listWordsNew = mutableListOf<Word>()
+            linesLetterMusic.mapIndexed { index, word ->
+                ///SEPARA EM CADA PALAVRA
+                val words = word.trim().split("\\s".toRegex())
+                for (i in words.indices) {
+                    listWordsOld.add(
+                        Word(
+                            wordName = words[i],
+                            fkChiper = _state.value.cipher!!.cipherId!!,
+                            order = i,
+                            numberLine = index
+                        )
                     )
-                )
+                }
             }
-            for (newWords in newWordsCipher) {
+
+            for (word: Word in listWordsOld) {
+                val wordTarget: WordWithChords? =
+                    _state.value.wordsWithChords.firstOrNull { w -> w.word.order == word.order }
+                if (wordTarget != null) {
+                    listWordsNew.add(wordTarget.word)
+                } else {
+                    listWordsNew.add(word)
+                }
+
+            }
+
+
+            for (newWords in listWordsNew) {
                 viewModelScope.async { localRepositoryImpl.upsertWord(newWords) }.await()
             }
 
-            viewModelScope.async {
-                getCipherById(id = _state.value.cipher!!.cipherId!!)
-            }.await()
+            viewModelScope.async { getCipherById(id = _state.value.cipher!!.cipherId!!) }.await()
 
             _state.update {
                 it.copy(

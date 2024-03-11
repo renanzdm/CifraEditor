@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -149,12 +148,12 @@ fun CipherDetailsPage(
                         }) {
                         Text(text = "Excluir")
                     }
-//                    TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-//                        onClick = {
-//                            showModalConfirmEdit = true
-//                        }) {
-//                        Text(text = "Editar Letra")
-//                    }
+                    TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        onClick = {
+                            showModalConfirmEdit = true
+                        }) {
+                        Text(text = "Editar Letra")
+                    }
 
                     TextButton(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         onClick = {
@@ -248,9 +247,7 @@ fun CipherDetailsPage(
                 Spacer(modifier = Modifier.height(20.dp))
                 AnimatedVisibility(visible = uiState.value.wordsFormatted.isNotEmpty()) {
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                        items(items = uiState.value.wordsFormatted, key = { item ->
-                            item.hashCode()
-                        }) { items ->
+                        items(items = uiState.value.wordsFormatted) { items ->
                             FlowRow {
                                 items.map { wordWithChords ->
                                     WordCard(uiState = uiState,
@@ -327,7 +324,7 @@ fun WordCard(
 
             if (!entity.chords.isNullOrEmpty()) {
                 items(
-                    key = { item -> item.hashCode() }, items = entity.chords
+                    items = entity.chords
                 ) {
                     Text(
                         modifier = Modifier.padding(horizontal = 2.dp),

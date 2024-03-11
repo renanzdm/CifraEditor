@@ -23,8 +23,8 @@ android {
         applicationId = "com.renan.cifraeditor"
         minSdk = 24
         targetSdk = 34
-        versionCode = 9
-        versionName = "1.9"
+        versionCode = 10
+        versionName = "1.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -93,10 +93,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("com.google.dagger:hilt-android:2.48.1")
-    implementation("androidx.compose.material3:material3:1.2.0-rc01")
-    implementation("androidx.navigation:navigation-runtime-ktx:2.7.6")
-    implementation("androidx.navigation:navigation-compose:2.7.6")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation("androidx.navigation:navigation-runtime-ktx:2.7.7")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("io.realm:realm-gradle-plugin:10.11.1")
